@@ -1,9 +1,11 @@
 <?php
 
+// Website reffered to while creating this php file: URL: https://www.tutorialspoint.com/postgresql/postgresql_php.htm
+
 // Database connection parameters
 $host = " ";    // host ip address
 $posrt = "5432";   // default postgresql port
-$dbname = " ";    // name of database
+$dbname = "codecryptix";    // name of database
 $user = "postgres";   
 $password = " ";    // postgresql password
 
