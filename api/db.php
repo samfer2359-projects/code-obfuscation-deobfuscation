@@ -3,11 +3,11 @@
 // Website reffered to while creating this php file: URL: https://www.tutorialspoint.com/postgresql/postgresql_php.htm
 
 // Database connection parameters
-$host = " ";    // host ip address
+$host = "192.168.31.134";    // host ip address
 $posrt = "5432";   // default postgresql port
 $dbname = "codecryptix";    // name of database
 $user = "postgres";   
-$password = " ";    // postgresql password
+$password = "1111";    // postgresql password
 
 // Create connection
 $conn = pg_connect("host=$host port=$port dbname=$dbname user=$user password=$password");
