@@ -1,0 +1,83 @@
+/* General Page Background */
+body {
+  background-color: #fffdf7;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #212121;
+  margin: 0;
+  padding: 0;
+}
+
+/* Container Box */
+.container {
+  max-width: 800px;
+  margin: 40px auto;
+  padding: 30px;
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+  text-align: center;
+}
+
+/* Headings */
+h1 {
+  font-size: 2.2rem;
+  color: #212121;
+  margin-bottom: 20px;
+}
+
+h2 {
+  font-size: 1.4rem;
+  color: #4caf50;
+  margin-top: 30px;
+  margin-bottom: 10px;
+}
+
+/* Intro Paragraph */
+.intro {
+  font-size: 1.1rem;
+  color: #6b7280;
+  margin-bottom: 20px;
+  line-height: 1.6;
+}
+
+/* Normal Paragraphs */
+p {
+  color: #212121;
+  line-height: 1.6;
+  margin-bottom: 15px;
+}
+
+/* Features List */
+.features-list {
+  list-style: none;
+  padding: 0;
+  margin: 20px 0;
+}
+
+.features-list li {
+  background: #f6fdf7;
+  border-left: 4px solid #4caf50;
+  margin: 8px 0;
+  padding: 12px 16px;
+  text-align: left;
+  font-size: 1rem;
+  border-radius: 8px;
+  color: #212121;
+  transition: transform 0.2s;
+}
+
+/* Button */
+.btn {
+  background: #4caf50;
+  color: white;
+  border: none;
+  padding: 12px 25px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background 0.3s ease;
+}
+
+.btn:hover {
+  background: #388e3c; /* darker hover */
+}
