@@ -2,7 +2,7 @@
 
 body {
   font-family: Arial, sans-serif;
-  background-color: #f4d9a4;
+  background-color: #e8f5e9;
   margin: 0px;
   height: 100vh;
   display: flex;
@@ -23,7 +23,7 @@ body {
 
 /* Heading */
 .login-container h2 {
-  color: #531506;
+  color: #212121;
   margin-bottom: 20px;
 }
 
@@ -31,22 +31,11 @@ body {
 label {
   display: block;
   text-align: left;
-  color: #2a0a02;
+  color: #212121;
   font-weight: bold;
   margin-bottom: 5px;
   align-items: center;
 }
-
-/* input[type="text"],
-input[type="password"],
-input[type="email"] {
-  width: 100%;
-  padding: 10px;
-  margin-bottom: 15px;
-  border: 2px solid #8e5d34;
-  border-radius: 8px;
-  background-color: #fff;
-} */
 
 input[type="text"],
 input[type="password"],
@@ -55,7 +44,7 @@ input[type="email"] {
   margin: 0 auto 15px;     /* centers them (auto left/right) */
   width: 90%;              /* slightly smaller than 100% so not touching edges */
   padding: 10px;
-  border: 2px solid #8e5d34;
+  border: 2px solid #6b7280;
   border-radius: 8px;
   background-color: #fff;
   box-sizing: border-box;  /* keeps padding inside the width */
@@ -74,22 +63,22 @@ button {
 }
 
 button[type="submit"] {
-  background-color: #531506;
+  background-color: #4caf50;
   color: #fff;
 }
 
 button[type="submit"]:hover {
-  background-color: #2a0a02;
+  background-color:  #388e3c;
 }
 
 /* Sign-up Link */
 .login-container p {
   margin-top: 15px;
-  color: #2a0a02;
+  color: #212121;
 }
 
 .login-container a {
-  color: #8e5d34;
+  color: #212121;
   text-decoration: none;
   font-weight: bold;
 }
@@ -101,18 +90,18 @@ button[type="submit"]:hover {
 /* Divider */
 hr {
   margin: 20px 0;
-  border: 1px solid #8e5d34;
+  border: 1px solid #212121;
 }
 
 /* Social Login Buttons */
 .social-login button {
-  background-color: #8e5d34;
+  background-color:  #212121;
   color: #fff;
   margin-bottom: 10px;
 }
 
 .social-login button:hover {
-  background-color: #531506;
+  background-color: #6b7280;
 }
 
 /* dashboard */
