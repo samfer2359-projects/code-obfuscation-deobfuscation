@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Code Obfuscator</title>
+ <style>
+  body {
+    background-color: #fffdf7;
+    color: #212121;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+    padding: 20px;
+  }
+
+  h1 {
+    color: #212121;
+    margin-bottom: 15px;
+  }
+
+  textarea {
+    width: 90%;
+    height: 200px;
+    margin: 10px 0;
+    padding: 12px;
+    border: 2px solid #6b7280;
+    border-radius: 8px;
+    font-family: monospace;
+    font-size: 16px;
+    background: #ffffff;
+    color: #212121;
+    transition: border 0.3s ease;
+  }
+
+  textarea:focus {
+    outline: none;
+    border: 2px solid #4caf50;
+  }
+
+  button {
+    background-color: #4caf50;
+    color: #fff;
+    border: none;
+    padding: 12px 24px;
+    margin: 8px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background 0.3s ease;
+  }
+
+  button:hover {
+    background-color: #388e3c;
+  }
+</style>
+
+</head>
+<body>
+  <h1>Code Obfuscator</h1>
+  <textarea id="inputCode" placeholder="Paste your code here..."></textarea>
+  <div>
+    <button>Obfuscate</button>
+    <button onclick="clearText()">Clear</button>
+  </div>
+  <textarea id="outputCode" readonly placeholder="Obfuscated code will appear here..."></textarea>
+  <script>
+    function clearText() {
+      document.getElementById('inputCode').value = '';
+      document.getElementById('outputCode').value = '';
+    }
+  </script>
+</body>
+</html>
