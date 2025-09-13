@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Sign Up</title>
+  <link rel="stylesheet" href="login.css">
+   
+</head>
+<body>
+  <div class="login-container">
+    <h2>Create Account</h2>
+    <form action="welcome.html" method="post">
+      <label for="fullname">Full Name:</label>
+      <input type="text" id="fullname" name="fullname" required>
+
+      <label for="email">Email:</label>
+      <input type="email" id="email" name="email" required>
+
+      <label for="username">Username:</label>
+      <input type="text" id="username" name="username" required>
+
+      <label for="password">Password:</label>
+      <input type="password" id="password" name="password" required>
+
+      <button type="submit">Sign Up</button>
+    </form>
+
+    <p>Already have an account? <a href="login.html">Login</a></p>
+
+    <hr>
+    <p>Or sign up with</p>
+    <div class="social-login">
+      <button class="google-btn">Continue with Google</button>
+      <button class="facebook-btn">Continue with Facebook</button>
+      <button class="twitter-btn">Continue with Twitter</button>
+    </div>
+  </div>
+</body>
+</html>
