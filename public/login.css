@@ -70,7 +70,6 @@ button[type="submit"] {
 button[type="submit"]:hover {
   background-color:  #388e3c;
 }
-
 /* Sign-up Link */
 .login-container p {
   margin-top: 15px;

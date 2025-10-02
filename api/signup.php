@@ -9,13 +9,6 @@ include('db.php');
 // Check if the form was submitted 
 if ($_SERVER['REQUEST_METHOD'] == 'POST')
 {
-   
-    echo "Form data received: <br>";  
-    echo "Full Name: " . $_POST['fullname'] . "<br>";
-    echo "Email: " . $_POST['email'] . "<br>";
-    echo "Username: " . $_POST['username'] . "<br>";
-    echo "Password: " . $_POST['password'] . "<br>";
-
      // Get form data and sanitize inputs
     $fullname = trim($_POST['fullname']);
     $email = trim($_POST['email']);
@@ -48,6 +41,7 @@ else
 }
 
 pg_close($conn);
+header("Location: ../public/index.html");  // Redirect to index.html
 
 ?>
 

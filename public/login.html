@@ -1,15 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Login Page</title>
+<head><meta charset="UTF-8"><title>Login Page</title>
   <link rel="stylesheet" href="login.css">
-
 </head>
 <body>
   <div class="login-container">
     <h2>Login</h2>
-    <form action="dashboard.html" method="post">
+    <form action="../api/login-validate.php" method="post">
       <label for="username">Username:</label>
       <input type="text" id="username" name="username" required>
       
@@ -19,7 +16,7 @@
       <button type="submit">Login</button>
     </form>
     
-    <p>Don’t have an account? <a href="signup.html">Sign up</a></p>
+    <p>Don't have an account? <a href="signup.html">Sign up</a></p>
     
     <hr>
     <p>Or sign in with</p>
@@ -29,6 +26,10 @@
       <button class="twitter-btn">Continue with Twitter</button>
     </div>
   </div>
+
+
+
+
 </body>
 </html>
 
