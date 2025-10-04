@@ -63,16 +63,59 @@
   <h1>Code Deobfuscator</h1>
   <textarea id="inputCode" placeholder="Paste obfuscated code here..."></textarea>
   <div>
-    <button>Deobfuscate</button>
+    <button id="deobfuscateBtn" type="button">Deobfuscate</button>
     <button onclick="clearText()">Clear</button>
   </div>
   <textarea id="outputCode" readonly placeholder="Deobfuscated code will appear here..."></textarea>
 
   <script>
-     function clearText() {
-      document.getElementById('inputCode').value = '';
-      document.getElementById('outputCode').value = '';
+  function clearText() {
+    document.getElementById('inputCode').value = '';
+    document.getElementById('outputCode').value = '';
+  }
+
+  document.getElementById('deobfuscateBtn').addEventListener('click', async function () {
+    const obf = document.getElementById('inputCode').value.trim();
+    if (!obf) {
+      alert('Paste obfuscated blob (base64) or provide obj_id (as "obj_id:NUMBER") in the input box.');
+      return;
     }
-  </script>
+
+    // Accept either:
+    // - direct base64 blob
+    // - a short syntax like: obj_id:123 to deobfuscate by obj_id
+    const formData = new FormData();
+    if (obf.startsWith('obj_id:')) {
+      const id = obf.split(':', 2)[1].trim();
+      formData.append('obj_id', id);
+    } else {
+      formData.append('obfuscated_code', obf);
+    }
+
+    try {
+      const res = await fetch('../api/deobfuscate.php', {
+        method: 'POST',
+        credentials: 'same-origin',
+        body: formData
+      });
+
+      if (!res.ok) {
+        const txt = await res.text();
+        throw new Error(txt || 'Server error');
+      }
+
+      const data = await res.json();
+      if (data.success) {
+        document.getElementById('outputCode').value = data.deobfuscated_code;
+      } else {
+        alert('Error: ' + (data.error || 'Unknown error'));
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Deobfuscation failed: ' + err.message);
+    }
+  });
+</script>
+
 </body>
 </html>

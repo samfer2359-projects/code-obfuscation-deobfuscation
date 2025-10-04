@@ -15,11 +15,11 @@ $conn = pg_connect("host=$host port=$port dbname=$dbname user=$user password=$pa
 // check if connection failed
 if(!$conn)
 {
-    echo "Error : Unable to connect to the database.";
+   // echo "Error : Unable to connect to the database.";
     exit;
 }
 
 // if connection is successful, the connection object (link) is established
-echo "Connected to the database successfully!";
+// echo "Connected to the database successfully!";
 
 ?>

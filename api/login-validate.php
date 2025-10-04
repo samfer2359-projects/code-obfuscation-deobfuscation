@@ -15,7 +15,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // Check if both fields are provided
     if (empty($username) || empty($password)) {
-        echo "Please provide both username and password.";
+       // echo "Please provide both username and password.";
+       header("Location: ../public/login.html?error=invalid_credentials");
         exit;
     }
 
@@ -24,7 +25,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $result = pg_query_params($conn, $query, array($username));
 
     if ($result === false) {
-        echo "Database query error.";
+       // echo "Database query error.";
         exit;
     }
 
@@ -55,15 +56,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             exit;
         } else {
             // Incorrect password
-            echo "Invalid password.";
+            // echo "Invalid password.";
+            header("Location: ../public/login.html?error=invalid_credentials");
+    exit;
         }
     } else {
         // User not found
-        echo "No user found with that username or email.";
+       // echo "No user found with that username or email.";
+       header("Location: ../public/login.html?error=invalid_credentials");
+    exit;
     }
 } else {
     // If the form was not submitted via POST method
-    echo "Invalid request method.";
+   // echo "Invalid request method.";
+    header("Location: ../public/login.html?error=request");
+    exit;
 }
 
 

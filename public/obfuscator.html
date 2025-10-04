@@ -73,7 +73,7 @@
 </head>
 <body>
   <h1>Code Obfuscator</h1>
-  <form method="post" action="../api/obfuscate.php">
+  <form id="obfuscateForm" method="post" action="../api/obfuscate.php">
 
   <textarea id="inputCode" name="original_code" placeholder="Paste your code here..."></textarea>
   <input type="text" id="language" name="language" placeholder="Enter language (e.g. PHP)" style="width: 90%; font-size: 14px; padding: 8px;">
@@ -90,7 +90,50 @@
     function clearText() {
       document.getElementById('inputCode').value = '';
       document.getElementById('outputCode').value = '';
+      var lang = document.getElementById('language');
+    if (lang) lang.value = '';
     }
+    document.getElementById('obfuscateForm').addEventListener('submit', async function (e) {
+    e.preventDefault();
+
+    const input = document.getElementById('inputCode').value;
+    const language = document.getElementById('language').value;
+
+    if (!input || !language) {
+      alert('Please provide code and language.');
+      return;
+    }
+    // build form data
+    const formData = new FormData();
+    formData.append('original_code', input);
+    formData.append('language', language);
+
+    try {
+      const res = await fetch('../api/obfuscate.php', {
+        method: 'POST',
+        credentials: 'same-origin',
+        body: formData
+      });
+
+      if (!res.ok) {
+        const txt = await res.text();
+        throw new Error(txt || 'Server error');
+      }
+
+      const data = await res.json();
+      if (data.success) {
+        // show base64 obfuscated blob in output textarea
+        document.getElementById('outputCode').value = data.obfuscated_code;
+        // optionally show obj_id etc (you can console.log)
+        console.log('obj_id', data.obj_id, 'method', data.method_used);
+      } else {
+        alert('Error: ' + (data.error || 'Unknown error'));
+      }
+      } catch (err) {
+      console.error(err);
+      alert('Obfuscation failed: ' + err.message);
+    }
+  });
   </script>
 </body>
 </html>

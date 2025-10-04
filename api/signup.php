@@ -17,10 +17,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 }
 
 /* Validate email format  website:https://www.w3schools.com/php/func_filter_var.asp */
-    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        echo "Invalid email format.";
-        exit;
-    }
+     if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+    header("Location: ../public/signup.html?error=invalid_email");
+    exit;
+}
+
 
 /*website: https://www.w3schools.com/php/func_filter_var.asp */
 $password_hash = password_hash($password, PASSWORD_BCRYPT);
@@ -33,11 +34,11 @@ $password_hash = password_hash($password, PASSWORD_BCRYPT);
 //check if execution was successful
 if(!$result)
 {
-    echo pg_last_error($conn);
+   // echo pg_last_error($conn);
 }
 else
 {
-    echo "Records created successfully ";
+   // echo "Records created successfully ";
 }
 
 pg_close($conn);

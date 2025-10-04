@@ -27,7 +27,24 @@
     </div>
   </div>
 
+<script>
+  (function () {
+    const params = new URLSearchParams(window.location.search);
+    const error = params.get('error');
 
+    if (error === 'invalid_credentials') {
+      alert('Invalid credentials');
+    } else if (error === 'request') {
+      alert('Please use the login form to access this page.');
+    }
+
+    if (error) {
+      params.delete('error');
+      const base = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
+      window.history.replaceState({}, document.title, base);
+    }
+  })();
+</script>
 
 
 </body>

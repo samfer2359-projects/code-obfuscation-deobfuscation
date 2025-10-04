@@ -6,13 +6,13 @@ include __DIR__ . '/db.php'; // adjust path if db.php is elsewhere
 // Simple check: require login
 if (!isset($_SESSION['user_id'])) {
     // Not logged in — stop and show a message (user must login first)
-    echo "You must be logged in to submit code.";
+   // echo "You must be logged in to submit code.";
     exit;
 }
 
 // Only accept POST
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    echo "Invalid request method.";
+   // echo "Invalid request method.";
     exit;
 }
 
@@ -21,7 +21,7 @@ $original_code = isset($_POST['original_code']) ? trim($_POST['original_code']) 
 $language = isset($_POST['language']) ? trim($_POST['language']) : '';
 
 if ($original_code === '' || $language === '') {
-    echo "Please provide code and language.";
+   // echo "Please provide code and language.";
     exit;
 }
 
@@ -33,15 +33,20 @@ $result = pg_query_params($conn, $query, array($user_id, $original_code, $langua
 
 if ($result === false) {
     // Show DB error for debugging (remove/replace in production)
-    echo "Database error: " . pg_last_error($conn);
+ //   echo "Database error: " . pg_last_error($conn);
     exit;
 }
 
 // Success — optionally redirect back to obfuscate page or a success page
 // Use a short message then redirect
-echo "Code saved successfully.";
+// echo "Code saved successfully.";
 
-// Redirect back to public/obfuscator.html 
- header("Location: ../public/obfuscator.html");
-exit;
+// Redirect back to public/obfuscator.html only if this file is requested directly (not included)
+if (realpath(__FILE__) === realpath($_SERVER['SCRIPT_FILENAME'])) {
+    header("Location: ../public/obfuscator.html");
+    exit;
+}
+// if included, simply return so the including script can continue
+return;
+
 ?>
