@@ -35,5 +35,25 @@
       <button class="twitter-btn">Continue with Twitter</button>
     </div>
   </div>
+  <script>
+  (function() {
+    const params = new URLSearchParams(window.location.search);
+    const error = params.get('error');
+    if (error) {
+      let message = '';
+      if (error === 'invalid_email') message = 'Please enter a valid email.';
+      else if (error === 'insert_failed') message = 'Signup failed. Try again.';
+      else if (error === 'request') message = 'Invalid request.';
+      else message = 'An error occurred.';
+      
+      alert(message);
+      // remove error from URL so alert doesn’t repeat on reload
+      params.delete('error');
+      const base = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
+      window.history.replaceState({}, document.title, base);
+    }
+  })();
+</script>
+
 </body>
 </html>

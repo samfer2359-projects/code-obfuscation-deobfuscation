@@ -1,5 +1,7 @@
 <?php
-// submit_code.php
+/* Turning snippets.php into a function just adds extra steps and makes things a bit more complicated for a small, simple script. Keeping the code in obfuscate.php directly is easier and faster.
+*/
+
 session_start();
 include __DIR__ . '/db.php'; // adjust path if db.php is elsewhere
 
@@ -7,6 +9,7 @@ include __DIR__ . '/db.php'; // adjust path if db.php is elsewhere
 if (!isset($_SESSION['user_id'])) {
     // Not logged in — stop and show a message (user must login first)
    // echo "You must be logged in to submit code.";
+    header("Location: ../public/login.html?error=not_logged_in");
     exit;
 }
 

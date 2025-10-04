@@ -36,6 +36,8 @@
       alert('Invalid credentials');
     } else if (error === 'request') {
       alert('Please use the login form to access this page.');
+    } else if (error === 'not_logged_in') {
+      alert('You must be logged in to submit code. Please log in first.');
     }
 
     if (error) {

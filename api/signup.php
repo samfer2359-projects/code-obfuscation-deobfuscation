@@ -14,7 +14,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
     $email = trim($_POST['email']);
     $username = trim($_POST['username']);
     $password = trim($_POST['password']);
-}
+
 
 /* Validate email format  website:https://www.w3schools.com/php/func_filter_var.asp */
      if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
@@ -35,14 +35,18 @@ $password_hash = password_hash($password, PASSWORD_BCRYPT);
 if(!$result)
 {
    // echo pg_last_error($conn);
-}
-else
-{
-   // echo "Records created successfully ";
+   header("Location: ../public/signup.html?error=insert_failed");
+        exit;
 }
 
 pg_close($conn);
 header("Location: ../public/index.html");  // Redirect to index.html
+}
+else {
+    // Redirect if the request method is not POST
+    header("Location: ../public/signup.html?error=request");
+    exit;
+}
 
 ?>
 
