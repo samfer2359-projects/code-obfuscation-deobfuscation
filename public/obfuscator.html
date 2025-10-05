@@ -82,9 +82,12 @@
 
   <div>
     <button type="submit">Obfuscate</button>
-    <button onclick="clearText()">Clear</button>
+    <button type="button" onclick="clearText()">Clear</button>
   </div>
   <textarea id="outputCode" readonly placeholder="Obfuscated code will appear here..."></textarea>
+  
+  <input type="text" id="objId" readonly placeholder="Object ID will appear here..." style="width:90%; margin-top:8px; padding:8px; border-radius:6px; border:1px solid #ccc;">
+
   </form>
   <script>
     function clearText() {
@@ -92,6 +95,8 @@
       document.getElementById('outputCode').value = '';
       var lang = document.getElementById('language');
     if (lang) lang.value = '';
+     var obj = document.getElementById('objId');
+    if (obj) obj.value = '';
     }
     document.getElementById('obfuscateForm').addEventListener('submit', async function (e) {
     e.preventDefault();
@@ -121,10 +126,18 @@
       }
 
       const data = await res.json();
+
       if (data.success) {
         // show base64 obfuscated blob in output textarea
         document.getElementById('outputCode').value = data.obfuscated_code;
-        // optionally show obj_id etc (you can console.log)
+
+         // show obj_id to the user
+         const objField = document.getElementById('objId');
+         if (objField) {
+          objField.value = String(data.obj_id);
+         }
+
+        // log to console
         console.log('obj_id', data.obj_id, 'method', data.method_used);
       } else {
         alert('Error: ' + (data.error || 'Unknown error'));
