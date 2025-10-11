@@ -92,3 +92,4 @@ echo json_encode([
     'deobfuscated_code' => $original_code
 ]);
 exit;
+?>
