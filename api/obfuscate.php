@@ -161,8 +161,13 @@ if ($do_runmark) {
     $methods[] = 'run-id';
 }
 
-// encode & store
-$obf_blob = base64_encode($code);
+//encrypt, encode & store
+//$obf_blob = base64_encode($code);
+// Encrypts and then coverts to base 64
+$iv_length = openssl_cipher_iv_length('AES-128-CTR');
+$iv = openssl_random_pseudo_bytes($iv_length);
+$obf_blob = openssl_encrypt($code, 'AES-128-CTR', 'TestKeyEncrypt16', 1 , $iv);
+
 $methods[] = 'base64';
 $method_used = implode(';', $methods);
 
