@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Welcome | Codecryptix</title>
+  <link rel="stylesheet" href="nav.css">
+  <link rel="stylesheet" href="welcome.css">
+</head>
+<body>
+  <nav>
+    <div class="logo">Codecryptix</div>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="obfuscator.php">Obfuscate</a></li>
+      <li><a href="deobfuscator.php">Deobfuscate</a></li>
+      <li><a href="awareness.html">Learn & Protect</a></li>
+      <li><a href="aboutpage.html">About</a></li>
+    </ul>
+    <div class="user-info">
+      <span id="username">Welcome, User!</span>
+      <button class="logout-btn">Logout</button>
+    </div>
+  </nav>
+
+  <main class="welcome-section">
+    <div class="welcome-box">
+      <h1>Hello, <span id="userNameDisplay">User</span></h1>
+      <p>Welcome to <strong>Codecryptix</strong> — your space to protect, transform, and explore code securely.</p>
+
+      <div class="dashboard-buttons">
+        <a href="obfuscator.php" class="dash-btn">🧩 Obfuscate Code</a>
+        <a href="deobfuscator.php" class="dash-btn">🔓 Deobfuscate Code</a>
+        <a href="awareness.html" class="dash-btn">🧠 Learn & Protect</a>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <p>© 2025 Codecryptix | Built with 💚 for creative coders</p>
+  </footer>
+
+  <script>
+    // Display stored username
+    const username = localStorage.getItem("username") || "User";
+    document.getElementById("username").textContent = `Welcome, ${username}!`;
+    document.getElementById("userNameDisplay").textContent = username;
+
+    // Logout functionality
+    document.querySelector(".logout-btn").addEventListener("click", () => {
+      localStorage.removeItem("username");
+      window.location.href = "login.html";
+    });
+  </script>
+</body>
+</html>

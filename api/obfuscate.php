@@ -161,35 +161,88 @@ if ($do_runmark) {
     $methods[] = 'run-id';
 }
 
+// generate a random access token (returned to user) and store its hash as obj_key
+$plain_token = bin2hex(random_bytes(8)); // 16-hex chars (~128 bits)
+$token_hash = password_hash($plain_token, PASSWORD_DEFAULT); // store hash in DB
+
+
 //encrypt, encode & store
 //$obf_blob = base64_encode($code);
 // Encrypts and then coverts to base 64
+//encrypt, include iv & base64 encode for safe text storage
 $iv_length = openssl_cipher_iv_length('AES-128-CTR');
 $iv = openssl_random_pseudo_bytes($iv_length);
-$obf_blob = openssl_encrypt($code, 'AES-128-CTR', 'TestKeyEncrypt16', 1 , $iv);
 
+// get raw ciphertext
+$cipher_raw = openssl_encrypt($code, 'AES-128-CTR', 'TestKeyEncrypt16', OPENSSL_RAW_DATA, $iv);
+
+// store iv + cipher as base64 so it is UTF-8 safe
+$obf_blob = base64_encode($iv . $cipher_raw);
+
+$methods[] = 'aes-128-ctr';
 $methods[] = 'base64';
 $method_used = implode(';', $methods);
 
-$insert_obf_sql = "INSERT INTO obfuscation (code_id, obfuscated_code, method_used) VALUES ($1, $2, $3) RETURNING obj_id, timestamp";
-$res2 = pg_query_params($conn, $insert_obf_sql, array($code_id, $obf_blob, $method_used));
+
+// If an obfuscation for this code_id already exists, return its obj_key and obfuscated blob instead
+$check_sql = "SELECT obj_key, obfuscated_code, method_used FROM obfuscation WHERE code_id = $1 LIMIT 1";
+$check = @pg_query_params($conn, $check_sql, array($code_id));
+if ($check === false) {
+    // DB error while checking
+    http_response_code(500);
+    echo json_encode(['error' => 'DB error checking existing obfuscation', 'details' => pg_last_error($conn)]);
+    exit;
+}
+if (pg_num_rows($check) > 0) {
+    $existing = pg_fetch_assoc($check);
+    // return existing obj_key and blob to user (do not create a new token)
+    echo json_encode([
+        'success' => true,
+        'obj_key' => $existing['obj_key'],
+        'access_token' => null,
+        'code_id' => $code_id,
+        'run_id' => $run_id,
+        'method_used' => $existing['method_used'],
+        'obfuscated_code' => $existing['obfuscated_code'],
+        'note' => 'Existing obfuscation for this code_id returned (no new token created).'
+    ]);
+    exit;
+}
+
+// Insert new obfuscation (no existing record)
+$insert_obf_sql = "INSERT INTO obfuscation (obj_key, code_id, obfuscated_code, method_used) VALUES ($1, $2, $3, $4) RETURNING obj_key, timestamp";
+$res2 = @pg_query_params($conn, $insert_obf_sql, array($token_hash, $code_id, $obf_blob, $method_used));
 if ($res2 === false) {
+    // log and return DB error
+    @file_put_contents(__DIR__ . '/debug.log', date('c') . " - INSERT obfuscation failed: " . pg_last_error($conn) . PHP_EOL, FILE_APPEND | LOCK_EX);
     http_response_code(500);
     echo json_encode(['error' => 'DB error inserting obfuscation', 'details' => pg_last_error($conn)]);
     exit;
 }
 $ob_row = pg_fetch_assoc($res2);
-$obj_id = (int) $ob_row['obj_id'];
+$obj_key = isset($ob_row['obj_key']) ? $ob_row['obj_key'] : null;
+
+// defensive: ensure obj_key and plain token exist before continuing
+if (empty($obj_key) || empty($plain_token)) {
+    @file_put_contents(__DIR__ . '/debug.log', date('c') . " - Missing obj_key or token after insert. obj_key=" . var_export($obj_key, true) . " token=" . var_export($plain_token, true) . PHP_EOL, FILE_APPEND | LOCK_EX);
+    http_response_code(500);
+    echo json_encode(['error' => 'Server error: token/key missing after insert', 'details' => pg_last_error($conn)]);
+    exit;
+}
+
+
 
 @pg_query_params($conn, "INSERT INTO session_log (user_id, action, status) VALUES ($1, $2, $3)", array($user_id, 'obfuscate', 'successful'));
 
 echo json_encode([
     'success' => true,
-    'obj_id' => $obj_id,
+    'access_token' => $plain_token,   // the plain token user must keep safe
     'code_id' => $code_id,
     'run_id' => $run_id,
     'method_used' => $method_used,
     'obfuscated_code' => $obf_blob
 ]);
+
 exit;
+
 ?>

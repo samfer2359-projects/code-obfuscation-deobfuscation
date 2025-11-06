@@ -1,0 +1,180 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+  background: #fffdf7;
+  color: #2c2c2c;
+}
+
+/* Navigation */
+nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 40px;
+  background-color: #e8f5e9;
+  border-radius: 0 0 15px 15px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+nav .logo {
+  font-size: 26px;
+  font-weight: bold;
+  color: #212121;
+}
+
+nav .nav-links {
+  list-style: none;
+  display: flex;
+  gap: 25px;
+}
+
+nav .nav-links li a {
+  text-decoration: none;
+  color: #212121;
+  font-weight: 500;
+}
+
+nav .nav-links li a:hover {
+  color: #4caf50;
+}
+
+/* Intro Section */
+.intro {
+  text-align: center;
+  padding: 60px 20px 30px;
+}
+
+.intro h1 {
+  font-size: 42px;
+  color: #212121;
+  margin-bottom: 15px;
+}
+
+.intro p {
+  max-width: 700px;
+  margin: 0 auto;
+  color: #6b7280;
+  line-height: 1.6;
+  font-size: 17px;
+}
+
+/* News Section */
+.news {
+  padding: 50px 40px;
+  background: #e8f5e9;
+}
+
+.news h2 {
+  text-align: center;
+  margin-bottom: 30px;
+  color: #212121;
+}
+
+.news-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 20px;
+}
+
+.news-card {
+  background: #dbf0dd;
+  padding: 20px;
+  border-radius: 15px;
+  width: 280px;
+  box-shadow: 0 5px 10px rgba(0,0,0,0.1);
+}
+
+.news-card h3 {
+  color: #212121;
+  margin-bottom: 10px;
+}
+
+.news-card p {
+  color: #555;
+  font-size: 15px;
+  margin-bottom: 10px;
+  line-height: 1.5;
+}
+
+.news-card a {
+  color: #4caf50;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+/* Stats Section */
+.stats {
+  padding: 60px 40px;
+  text-align: center;
+}
+
+.stats h2 {
+  margin-bottom: 30px;
+  color: #212121;
+}
+
+.charts {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 40px;
+}
+
+.chart h3 {
+  color: #6b7280;
+  margin-bottom: 10px;
+}
+
+/* Studies Section */
+.studies {
+  background: #e8f5e9;
+  padding: 50px 40px;
+}
+
+.studies h2 {
+  text-align: center;
+  margin-bottom: 25px;
+}
+
+.studies ul {
+  max-width:fit-content;
+  margin: 0 auto;
+  color: #555;
+  font-size: 16px;
+  line-height: 1.8;
+}
+
+/* Why Us Section */
+.why-us {
+  padding: 60px 40px;
+  text-align: center;
+}
+
+.why-us h2 {
+  color: #212121;
+  margin-bottom: 20px;
+}
+
+.why-us p {
+  max-width: 700px;
+  margin: 0 auto;
+  color: #6b7280;
+  font-size: 17px;
+  line-height: 1.6;
+}
+
+/* Footer */
+footer {
+  background-color: #dbf0dd;
+  text-align: center;
+  padding: 15px;
+  color: #212121;
+  border-radius: 15px 15px 0 0;
+  margin-top: 40px;
+}

@@ -17,79 +17,73 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
-// The API accepts either:
-// - obj_id (integer) — primary key in obfuscation
-// - obfuscated_code (base64 string) — the blob returned earlier
-$input_obj_id = isset($_POST['obj_id']) ? trim((string)$_POST['obj_id']) : '';
-$obfuscated_code = isset($_POST['obfuscated_code']) ? trim((string)$_POST['obfuscated_code']) : '';
-
-if ($input_obj_id === '' && $obfuscated_code === '') {
+$access_token = isset($_POST['access_token']) ? trim($_POST['access_token']) : '';
+if ($access_token === '') {
     http_response_code(400);
-    echo json_encode(['error' => 'Provide either obj_id or obfuscated_code.']);
+    echo json_encode(['error' => 'Access token is required.']);
     exit;
 }
 
-$obj_id = null;
-$code_id = null;
-$original_code = null;
-$method_used = null;
+// Find record by verifying token hash
+$q = "SELECT o.obj_key, o.code_id, o.method_used, c.original_code
+      FROM obfuscation o
+      JOIN codesnippet c ON o.code_id = c.code_id";
+$res = pg_query($conn, $q);
 
-// If obj_id supplied, fetch direct
-if ($input_obj_id !== '') {
-    $q = "SELECT o.obj_id, o.obfuscated_code, o.method_used, c.code_id, c.original_code
-          FROM obfuscation o
-          JOIN codesnippet c ON o.code_id = c.code_id
-          WHERE o.obj_id = $1
-          LIMIT 1";
-    $res = pg_query_params($conn, $q, [$input_obj_id]);
-    if ($res && pg_num_rows($res) > 0) {
-        $r = pg_fetch_assoc($res);
-        $obj_id = (int)$r['obj_id'];
-        $code_id = (int)$r['code_id'];
-        $original_code = $r['original_code'];
-        $method_used = $r['method_used'];
-    }
-} else {
-    // Find by obfuscated_code
-    $q = "SELECT o.obj_id, o.obfuscated_code, o.method_used, c.code_id, c.original_code
-          FROM obfuscation o
-          JOIN codesnippet c ON o.code_id = c.code_id
-          WHERE o.obfuscated_code = $1
-          LIMIT 1";
-    $res = pg_query_params($conn, $q, [$obfuscated_code]);
-    if ($res && pg_num_rows($res) > 0) {
-        $r = pg_fetch_assoc($res);
-        $obj_id = (int)$r['obj_id'];
-        $code_id = (int)$r['code_id'];
-        $original_code = $r['original_code'];
-        $method_used = $r['method_used'];
+
+$found = false;
+$record = null;
+
+if ($res && pg_num_rows($res) > 0) {
+    while ($r = pg_fetch_assoc($res)) {
+        if (password_verify($access_token, $r['obj_key'])) {
+            $found = true;
+            $record = $r;
+            break;
+        }
     }
 }
 
-if ($obj_id === null) {
-    http_response_code(404);
-    echo json_encode(['error' => 'Obfuscated record not found.']);
+
+// ensure we found a matching record
+if (!$found || !$record) {
+    http_response_code(403);
+    echo json_encode(['error' => 'Invalid or incorrect access token.']);
     exit;
 }
 
-// Insert deobfuscation record (if not already present)
-// deobfuscation has UNIQUE(obj_id) per your schema, so attempt insert and ignore duplicate errors
-$insert_deob_sql = "INSERT INTO deobfuscation (obj_id, deobfuscated_code) VALUES ($1, $2)";
-$ins = pg_query_params($conn, $insert_deob_sql, [$obj_id, $original_code]);
+// set variables from the found record
+$obj_key = isset($record['obj_key']) ? $record['obj_key'] : null;
+$code_id = isset($record['code_id']) ? (int)$record['code_id'] : null;
+$original_code = isset($record['original_code']) ? $record['original_code'] : null;
+$method_used = isset($record['method_used']) ? $record['method_used'] : null;
 
-// Log session action
-$action = 'deobfuscate';
-$status = ($ins !== false) ? 'successful' : 'duplicate_or_db_error';
-$log_sql = "INSERT INTO session_log (user_id, action, status) VALUES ($1, $2, $3)";
-@pg_query_params($conn, $log_sql, [$_SESSION['user_id'], $action, $status]);
+if (empty($obj_key)) {
+    http_response_code(500);
+    echo json_encode(['error'=>'Server error: obj_key missing']);
+    exit;
+}
 
-// Return original_code
+
+
+// Record the action
+$insert_deob_sql = "INSERT INTO deobfuscation (obj_key, deobfuscated_code) VALUES ($1, $2)
+                    ON CONFLICT (obj_key) DO NOTHING";
+pg_query_params($conn, $insert_deob_sql, [$obj_key, $original_code]);
+
+
+@pg_query_params($conn,
+    "INSERT INTO session_log (user_id, action, status) VALUES ($1, $2, $3)",
+    [$_SESSION['user_id'], 'deobfuscate', 'successful']
+);
+
 echo json_encode([
     'success' => true,
-    'obj_id' => $obj_id,
+    'obj_key' => $obj_key,
     'code_id' => $code_id,
     'method_used' => $method_used,
     'deobfuscated_code' => $original_code
 ]);
+
 exit;
 ?>

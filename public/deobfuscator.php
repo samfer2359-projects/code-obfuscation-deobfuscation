@@ -1,3 +1,11 @@
+<?php
+session_start();
+if (!isset($_SESSION['user_id'])) {
+    header("Location: login.html?error=not_logged_in");
+    exit;
+}
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -60,37 +68,36 @@
 
 </head>
 <body>
+  
+
   <h1>Code Deobfuscator</h1>
-  <textarea id="inputCode" placeholder="Paste obfuscated code here..."></textarea>
-  <div>
-    <button id="deobfuscateBtn" type="button">Deobfuscate</button>
-    <button onclick="clearText()">Clear</button>
-  </div>
-  <textarea id="outputCode" readonly placeholder="Deobfuscated code will appear here..."></textarea>
+
+<input type="password" id="accessToken" placeholder="Enter your access token..." 
+  style="width:90%; padding:10px; margin:10px 0; border-radius:6px; border:1px solid #ccc;">
+
+<div>
+  <button id="deobfuscateBtn" type="button">Deobfuscate</button>
+  <button onclick="clearText()">Clear</button>
+</div>
+
+<textarea id="outputCode" readonly placeholder="Deobfuscated code will appear here..."></textarea>
+
 
   <script>
   function clearText() {
-    document.getElementById('inputCode').value = '';
+    document.getElementById('accessToken').value = '';
     document.getElementById('outputCode').value = '';
   }
 
   document.getElementById('deobfuscateBtn').addEventListener('click', async function () {
-    const obf = document.getElementById('inputCode').value.trim();
-    if (!obf) {
-      alert('Paste obfuscated blob (base64) or provide obj_id (as "obj_id:NUMBER") in the input box.');
+    const token = document.getElementById('accessToken').value.trim();
+    if (!token) {
+      alert('Please enter your access token.');
       return;
     }
 
-    // Accept either:
-    // - direct base64 blob
-    // - a short syntax like: obj_id:123 to deobfuscate by obj_id
     const formData = new FormData();
-    if (obf.startsWith('obj_id:')) {
-      const id = obf.split(':', 2)[1].trim();
-      formData.append('obj_id', id);
-    } else {
-      formData.append('obfuscated_code', obf);
-    }
+    formData.append('access_token', token);
 
     try {
       const res = await fetch('../api/deobfuscate.php', {
@@ -116,6 +123,7 @@
     }
   });
 </script>
+
 
 </body>
 </html>

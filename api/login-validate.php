@@ -51,8 +51,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                           VALUES ($1, $2, $3, now())";
             pg_query_params($conn, $log_query, array($user['user_id'], $action, $status));
 
+            echo "<script>
+localStorage.setItem('username', '" . addslashes($user['username']) . "');
+window.location.href = '../public/welcome.html';
+</script>";
+exit;
+
             // Redirect to index.html or any other page
-            header("Location: ../public/index.html");
+            header("Location: ../public/welcome.html");
             exit;
         } else {
             // Incorrect password

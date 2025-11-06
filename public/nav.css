@@ -1,0 +1,183 @@
+/* ====== Navigation Bar Styles (for all pages) ====== */
+
+/* ---------- Global Reset ---------- */
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  overflow-x: hidden;
+  background-color: #fffdf7;
+  color: #212121;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: inherit;
+  margin: 0;
+  padding: 0;
+}
+
+/* ---------- Navigation Bar ---------- */
+nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 40px;
+  background-color: #e8f5e9;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  border-radius: 0; /* square edges */
+  height: 70px;
+  z-index: 9999;
+}
+
+nav .logo {
+  font-size: 28px;
+  font-weight: bold;
+  color: #212121;
+}
+
+nav .logo a {
+  text-decoration: none;
+  color: inherit;
+}
+
+nav .nav-links {
+  list-style: none;
+  display: flex;
+  gap: 25px;
+}
+
+nav .nav-links li a {
+  text-decoration: none;
+  color: #212121;
+  font-weight: 500;
+  transition: color 0.3s;
+}
+
+nav .nav-links li a:hover {
+  color: #4caf50;
+}
+
+/* ---------- User Info / Logout ---------- */
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logout-btn {
+  background-color: #4caf50;
+  border: none;
+  color: #fff;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 15px;
+  transition: background 0.3s ease;
+}
+
+.logout-btn:hover {
+  background-color: #388e3c;
+}
+
+/* ---------- Page Layout ---------- */
+body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  padding-top: 80px; /* space for fixed navbar */
+}
+
+/* ---------- Welcome Section ---------- */
+.welcome-section {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 40px 20px;
+  animation: fadeIn 0.9s ease-in;
+}
+
+.welcome-box {
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  padding: 50px 40px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  max-width: 650px;
+  transition: transform 0.3s ease;
+}
+
+.welcome-box:hover {
+  transform: translateY(-5px);
+}
+
+.welcome-box h1 {
+  font-size: 2.4rem;
+  margin-bottom: 12px;
+  color: #212121;
+}
+
+.welcome-box h1 span {
+  color: #4caf50;
+}
+
+.welcome-box p {
+  font-size: 1.1rem;
+  color: #555;
+  margin-bottom: 40px;
+  line-height: 1.5;
+}
+
+/* ---------- Dashboard Buttons ---------- */
+.dashboard-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 15px;
+}
+
+.dash-btn {
+  text-decoration: none;
+  background-color: #4caf50;
+  color: #fff;
+  padding: 14px 28px;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dash-btn:hover {
+  background-color: #388e3c;
+  transform: translateY(-3px);
+}
+
+/* ---------- Footer ---------- */
+footer {
+  text-align: center;
+  padding: 15px;
+  font-size: 14px;
+  background-color: #ffffff;
+  border-top: 1px solid #e0e0e0;
+  color: #6b7280;
+}
+
+/* ---------- Animations ---------- */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}

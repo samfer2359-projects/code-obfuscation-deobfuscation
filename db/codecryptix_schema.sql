@@ -21,7 +21,7 @@ CREATE TABLE codesnippet (
 );
 
 CREATE TABLE obfuscation (
-    obj_id SERIAL PRIMARY KEY,
+    obj_key TEXT PRIMARY KEY,
     code_id INT NOT NULL UNIQUE,
     obfuscated_code TEXT NOT NULL,
     method_used VARCHAR(100) NOT NULL,
@@ -32,11 +32,11 @@ CREATE TABLE obfuscation (
 
 CREATE TABLE deobfuscation (
     deobj_id SERIAL PRIMARY KEY,
-    obj_id INT NOT NULL UNIQUE,
+    obj_key TEXT NOT NULL UNIQUE,
     deobfuscated_code TEXT NOT NULL,
     timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT deobfuscation_obj_id_fkey FOREIGN KEY (obj_id) 
-        REFERENCES obfuscation(obj_id) ON DELETE CASCADE
+    CONSTRAINT deobfuscation_obj_key_fkey FOREIGN KEY (obj_key) 
+        REFERENCES obfuscation(obj_key) ON DELETE CASCADE
 );
 
 CREATE TABLE session_log (

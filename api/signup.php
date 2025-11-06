@@ -40,7 +40,11 @@ if(!$result)
 }
 
 pg_close($conn);
-header("Location: ../public/index.html");  // Redirect to index.html
+session_start();
+$_SESSION['user_id'] = pg_last_oid($result); // optional if you want the DB id
+$_SESSION['username'] = $username;
+$_SESSION['email'] = $email;
+header("Location: ../public/welcome.html");  // Redirect to welcome.html
 }
 else {
     // Redirect if the request method is not POST
