@@ -16,7 +16,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Check if both fields are provided
     if (empty($username) || empty($password)) {
        // echo "Please provide both username and password.";
-       header("Location: ../public/login.html?error=invalid_credentials");
+       header("Location: login.html?error=invalid_credentials");
         exit;
     }
 
@@ -53,29 +53,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             echo "<script>
 localStorage.setItem('username', '" . addslashes($user['username']) . "');
-window.location.href = '../public/welcome.html';
+window.location.href = 'welcome.php';
 </script>";
 exit;
 
             // Redirect to index.html or any other page
-            header("Location: ../public/welcome.html");
+            header("Location: welcome.php");
             exit;
         } else {
             // Incorrect password
             // echo "Invalid password.";
-            header("Location: ../public/login.html?error=invalid_credentials");
+            header("Location: login.html?error=invalid_credentials");
     exit;
         }
     } else {
         // User not found
        // echo "No user found with that username or email.";
-       header("Location: ../public/login.html?error=invalid_credentials");
+       header("Location: login.html?error=invalid_credentials");
     exit;
     }
 } else {
     // If the form was not submitted via POST method
    // echo "Invalid request method.";
-    header("Location: ../public/login.html?error=request");
+    header("Location: login.html?error=request");
     exit;
 }
 

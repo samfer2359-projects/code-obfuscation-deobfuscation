@@ -11,7 +11,7 @@
     <nav>
         <div class="logo">Codecryptix</div>
         <ul class="nav-links">
-            <li><a href="index.html">Home</a></li>
+            <li><a href="welcome.php">Home</a></li>
             <li><a href="obfuscator.html">Obfuscate</a></li>
             <li><a href="deobfuscator.html">Deobfuscate</a></li>
             <li><a href="awareness.html">Learn & Protect</a></li>
@@ -97,6 +97,19 @@
   <footer>
     <p>© 2025 Codecryptix. All Rights Reserved.</p>
   </footer>
+
+  <script>
+    // Display stored username
+    const username = localStorage.getItem("username") || "User";
+    document.getElementById("username").textContent = `Welcome, ${username}!`;
+    document.getElementById("userNameDisplay").textContent = username;
+
+    // Logout functionality
+    document.querySelector(".logout-btn").addEventListener("click", () => {
+      localStorage.removeItem("username");
+      window.location.href = "login.html";
+    });
+  </script>
 
 </body>
 </html>

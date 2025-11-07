@@ -18,7 +18,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 
 /* Validate email format  website:https://www.w3schools.com/php/func_filter_var.asp */
      if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-    header("Location: ../public/signup.html?error=invalid_email");
+    header("Location:signup.html?error=invalid_email");
     exit;
 }
 
@@ -35,7 +35,7 @@ $password_hash = password_hash($password, PASSWORD_BCRYPT);
 if(!$result)
 {
    // echo pg_last_error($conn);
-   header("Location: ../public/signup.html?error=insert_failed");
+   header("Location: signup.html?error=insert_failed");
         exit;
 }
 
@@ -44,11 +44,11 @@ session_start();
 $_SESSION['user_id'] = pg_last_oid($result); // optional if you want the DB id
 $_SESSION['username'] = $username;
 $_SESSION['email'] = $email;
-header("Location: ../public/welcome.html");  // Redirect to welcome.html
+header("Location: welcome.html");  // Redirect to welcome.html
 }
 else {
     // Redirect if the request method is not POST
-    header("Location: ../public/signup.html?error=request");
+    header("Location: signup.html?error=request");
     exit;
 }
 

@@ -12,6 +12,8 @@ if (!isset($_SESSION['user_id'])) {
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Code Deobfuscator</title>
+  <link rel="stylesheet" href="nav.css">
+  <link rel="stylesheet" href="welcome.css">
   <style>
   body {
     background-color: #fffdf7;
@@ -49,6 +51,27 @@ if (!isset($_SESSION['user_id'])) {
     border: 2px solid #4caf50;
   }
 
+  input[type="text"],
+input[type="password"] {
+  width: 90%;
+  padding: 12px;
+  margin: 10px 0;
+  border: 2px solid #6b7280;
+  border-radius: 8px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 16px;
+  background: #ffffff;
+  color: #212121;
+  transition: border 0.3s ease;
+}
+
+input[type="text"]:focus,
+input[type="password"]:focus {
+  outline: none;
+  border: 2px solid #4caf50;
+}
+
+
   button {
     background-color: #4caf50;
     color: #fff;
@@ -69,11 +92,25 @@ if (!isset($_SESSION['user_id'])) {
 </head>
 <body>
   
-
+<nav>
+    <div class="logo">Codecryptix</div>
+    <ul class="nav-links">
+      <li><a href="welcome.php">Home</a></li>
+      <li><a href="obfuscator.php">Obfuscate</a></li>
+      <li><a href="deobfuscator.php">Deobfuscate</a></li>
+      <li><a href="awareness.html">Learn & Protect</a></li>
+      <li><a href="aboutpage.html">About</a></li>
+    </ul>
+    <div class="user-info">
+      <span id="username">Welcome, User!</span>
+      <button class="logout-btn">Logout</button>
+    </div>
+  </nav>
+  <br><br><br>
   <h1>Code Deobfuscator</h1>
 
-<input type="password" id="accessToken" placeholder="Enter your access token..." 
-  style="width:90%; padding:10px; margin:10px 0; border-radius:6px; border:1px solid #ccc;">
+<input type="password" id="userPassword" placeholder="Enter your password...">
+
 
 <div>
   <button id="deobfuscateBtn" type="button">Deobfuscate</button>
@@ -84,36 +121,81 @@ if (!isset($_SESSION['user_id'])) {
 
 
   <script>
+  // Display stored username (guarded)
+  const username = localStorage.getItem("username") || "User";
+  const usernameElem = document.getElementById("username");
+  if (usernameElem) usernameElem.textContent = `Welcome, ${username}!`;
+  // Only set userNameDisplay if that element exists
+  const userNameDisplayElem = document.getElementById("userNameDisplay");
+  if (userNameDisplayElem) userNameDisplayElem.textContent = username;
+
+  // Logout functionality (safe guard)
+  const logoutBtn = document.querySelector(".logout-btn");
+  if (logoutBtn) {
+    logoutBtn.addEventListener("click", () => {
+      localStorage.removeItem("username");
+      // optionally call server logout endpoint if you have one
+      window.location.href = "login.html";
+    });
+  }
+
   function clearText() {
-    document.getElementById('accessToken').value = '';
-    document.getElementById('outputCode').value = '';
+    const pwd = document.getElementById('userPassword');
+    if (pwd) pwd.value = '';
+    const out = document.getElementById('outputCode');
+    if (out) out.value = '';
   }
 
   document.getElementById('deobfuscateBtn').addEventListener('click', async function () {
-    const token = document.getElementById('accessToken').value.trim();
-    if (!token) {
-      alert('Please enter your access token.');
+    const password = (document.getElementById('userPassword') || { value: '' }).value.trim();
+    if (!password) {
+      alert('Please enter your password.');
       return;
     }
 
     const formData = new FormData();
-    formData.append('access_token', token);
+    formData.append('password', password);
 
     try {
-      const res = await fetch('../api/deobfuscate.php', {
+      // IMPORTANT: choose the correct URL below:
+      // If your api file is in the same public folder use './deobfuscate.php'
+      // If it's in a separate api folder use '/dynamic-code-obfuscation-deobfuscation/api/deobfuscate.php'
+      const fetchUrl = './deobfuscate.php'; // ← change this if your file is elsewhere
+
+      console.log('Posting to', fetchUrl);
+      const res = await fetch(fetchUrl, {
         method: 'POST',
         credentials: 'same-origin',
         body: formData
       });
 
-      if (!res.ok) {
-        const txt = await res.text();
-        throw new Error(txt || 'Server error');
+      // redirect to login if server says unauthorized
+      if (res.status === 401) {
+        window.location.href = 'login.html?error=not_logged_in';
+        return;
       }
 
-      const data = await res.json();
+      // read raw text for safer debugging
+      const text = await res.text();
+
+      // try parse JSON
+      let data;
+      try {
+        data = JSON.parse(text);
+      } catch (err) {
+        console.error('Server returned non-JSON response:', text);
+        alert('Deobfuscation failed: server returned invalid response (check console).');
+        return;
+      }
+
+      if (!res.ok) {
+        console.error('Server error response:', data);
+        alert('Error: ' + (data.error || 'Server returned an error'));
+        return;
+      }
+
       if (data.success) {
-        document.getElementById('outputCode').value = data.deobfuscated_code;
+        document.getElementById('outputCode').value = data.deobfuscated_code || '';
       } else {
         alert('Error: ' + (data.error || 'Unknown error'));
       }
@@ -123,6 +205,8 @@ if (!isset($_SESSION['user_id'])) {
     }
   });
 </script>
+
+
 
 
 </body>

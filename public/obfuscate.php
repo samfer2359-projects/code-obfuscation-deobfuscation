@@ -25,6 +25,13 @@ if ($original_code === '' || $language === '') {
     echo json_encode(['error' => 'Provide original_code and language']);
     exit;
 }
+$password = isset($_POST['password']) ? trim((string)$_POST['password']) : '';
+if ($password === '') {
+    http_response_code(400);
+    echo json_encode(['error' => 'Password required']);
+    exit;
+}
+
 
 // run randomness (in-memory only)
 $run_id = substr(bin2hex(random_bytes(3)), 0, 6);
@@ -107,9 +114,17 @@ function insert_block_at_position($code, $block, $position) {
 }
 
 // store original snippet (DB unchanged)
+// store original snippet encrypted using user's password
 $user_id = (int) $_SESSION['user_id'];
+
+// encrypt original_code using password as key (AES-128-CTR)
+$orig_iv_length = openssl_cipher_iv_length('AES-128-CTR');
+$orig_iv = openssl_random_pseudo_bytes($orig_iv_length);
+$orig_cipher_raw = openssl_encrypt($original_code, 'AES-128-CTR', $password, OPENSSL_RAW_DATA, $orig_iv);
+$encoded_original = base64_encode($orig_iv . $orig_cipher_raw);
+
 $insert_sql = "INSERT INTO codesnippet (user_id, original_code, language) VALUES ($1, $2, $3) RETURNING code_id";
-$ins = pg_query_params($conn, $insert_sql, array($user_id, $original_code, $language));
+$ins = pg_query_params($conn, $insert_sql, array($user_id, $encoded_original, $language));
 if ($ins === false) {
     http_response_code(500);
     echo json_encode(['error' => 'DB error inserting codesnippet', 'details' => pg_last_error($conn)]);
@@ -117,6 +132,7 @@ if ($ins === false) {
 }
 $row = pg_fetch_assoc($ins);
 $code_id = (int) $row['code_id'];
+
 
 // pipeline
 $methods = [];
@@ -161,9 +177,9 @@ if ($do_runmark) {
     $methods[] = 'run-id';
 }
 
-// generate a random access token (returned to user) and store its hash as obj_key
-$plain_token = bin2hex(random_bytes(8)); // 16-hex chars (~128 bits)
-$token_hash = password_hash($plain_token, PASSWORD_DEFAULT); // store hash in DB
+// store a hash of the user's password in obj_key for later verification
+$token_hash = password_hash($password, PASSWORD_DEFAULT);
+
 
 
 //encrypt, encode & store
@@ -174,7 +190,8 @@ $iv_length = openssl_cipher_iv_length('AES-128-CTR');
 $iv = openssl_random_pseudo_bytes($iv_length);
 
 // get raw ciphertext
-$cipher_raw = openssl_encrypt($code, 'AES-128-CTR', 'TestKeyEncrypt16', OPENSSL_RAW_DATA, $iv);
+$cipher_raw = openssl_encrypt($code, 'AES-128-CTR', $password, OPENSSL_RAW_DATA, $iv);
+
 
 // store iv + cipher as base64 so it is UTF-8 safe
 $obf_blob = base64_encode($iv . $cipher_raw);
@@ -193,21 +210,22 @@ if ($check === false) {
     echo json_encode(['error' => 'DB error checking existing obfuscation', 'details' => pg_last_error($conn)]);
     exit;
 }
+
 if (pg_num_rows($check) > 0) {
     $existing = pg_fetch_assoc($check);
-    // return existing obj_key and blob to user (do not create a new token)
+    // Do NOT expose obj_key publicly
     echo json_encode([
         'success' => true,
-        'obj_key' => $existing['obj_key'],
         'access_token' => null,
         'code_id' => $code_id,
         'run_id' => $run_id,
         'method_used' => $existing['method_used'],
         'obfuscated_code' => $existing['obfuscated_code'],
-        'note' => 'Existing obfuscation for this code_id returned (no new token created).'
+        'note' => 'Existing obfuscation for this code_id returned.'
     ]);
     exit;
 }
+
 
 // Insert new obfuscation (no existing record)
 $insert_obf_sql = "INSERT INTO obfuscation (obj_key, code_id, obfuscated_code, method_used) VALUES ($1, $2, $3, $4) RETURNING obj_key, timestamp";
@@ -220,11 +238,11 @@ if ($res2 === false) {
     exit;
 }
 $ob_row = pg_fetch_assoc($res2);
-$obj_key = isset($ob_row['obj_key']) ? $ob_row['obj_key'] : null;
 
-// defensive: ensure obj_key and plain token exist before continuing
-if (empty($obj_key) || empty($plain_token)) {
-    @file_put_contents(__DIR__ . '/debug.log', date('c') . " - Missing obj_key or token after insert. obj_key=" . var_export($obj_key, true) . " token=" . var_export($plain_token, true) . PHP_EOL, FILE_APPEND | LOCK_EX);
+
+// defensive: ensure insert succeeded
+if ($res2 === false) {
+    @file_put_contents(__DIR__ . '/debug.log', date('c') . " - Missing token_hash after insert." . PHP_EOL, FILE_APPEND | LOCK_EX);
     http_response_code(500);
     echo json_encode(['error' => 'Server error: token/key missing after insert', 'details' => pg_last_error($conn)]);
     exit;
@@ -232,16 +250,19 @@ if (empty($obj_key) || empty($plain_token)) {
 
 
 
+
 @pg_query_params($conn, "INSERT INTO session_log (user_id, action, status) VALUES ($1, $2, $3)", array($user_id, 'obfuscate', 'successful'));
 
 echo json_encode([
     'success' => true,
-    'access_token' => $plain_token,   // the plain token user must keep safe
     'code_id' => $code_id,
     'run_id' => $run_id,
     'method_used' => $method_used,
-    'obfuscated_code' => $obf_blob
+    'obfuscated_code' => $obf_blob,
+    'note' => 'Obfuscation created. Use your password to deobfuscate.'
 ]);
+exit;
+
 
 exit;
 

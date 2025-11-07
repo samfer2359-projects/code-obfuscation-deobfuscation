@@ -5,8 +5,25 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>About - CodeCryptix</title>
   <link rel="stylesheet" href="aboutpage.css">
+  <link rel="stylesheet" href="welcome.css">
+  <link rel="stylesheet" href="nav.css">
 </head>
 <body>
+  <nav>
+    <div class="logo">Codecryptix</div>
+    <ul class="nav-links">
+      <li><a href="welcome.html">Home</a></li>
+      <li><a href="obfuscator.php">Obfuscate</a></li>
+      <li><a href="deobfuscator.php">Deobfuscate</a></li>
+      <li><a href="awareness.html">Learn & Protect</a></li>
+      <li><a href="aboutpage.html">About</a></li>
+    </ul>
+    <div class="user-info">
+      <span id="username">Welcome, User!</span>
+      <button class="logout-btn">Logout</button>
+    </div>
+  </nav>
+  <br><br><br>
   <div class="container">
     <h1>About CodeCryptix</h1>
     <p class="intro">
@@ -43,7 +60,21 @@
       </strong>
     </p>
 
-    <a href="index.html"><button class="btn">Back to Home</button></a>
+    <a href="welcome.php"><button class="btn">Back to Home</button></a>
   </div>
+
+  <script>
+    // Display stored username
+    const username = localStorage.getItem("username") || "User";
+    document.getElementById("username").textContent = `Welcome, ${username}!`;
+    document.getElementById("userNameDisplay").textContent = username;
+
+    // Logout functionality
+    document.querySelector(".logout-btn").addEventListener("click", () => {
+      localStorage.removeItem("username");
+      window.location.href = "login.html";
+    });
+  </script>
+
 </body>
 </html>
