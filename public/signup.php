@@ -10,7 +10,7 @@ include('db.php');
 if ($_SERVER['REQUEST_METHOD'] == 'POST')
 {
      // Get form data and sanitize inputs
-    $fullname = trim($_POST['fullname']);
+    
     $email = trim($_POST['email']);
     $username = trim($_POST['username']);
     $password = trim($_POST['password']);
