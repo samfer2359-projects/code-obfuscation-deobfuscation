@@ -46,14 +46,14 @@ $username = isset($_SESSION['username']) ? htmlspecialchars($_SESSION['username'
   <nav>
     <div class="logo">Codecryptix</div>
     <ul class="nav-links">
-      <li><a href="welcome.html">Home</a></li>
+      <li><a href="welcome.php">Home</a></li>
       <li><a href="obfuscator.php">Obfuscate</a></li>
       <li><a href="deobfuscator.php">Deobfuscate</a></li>
       <li><a href="awareness.html">Learn & Protect</a></li>
       <li><a href="aboutpage.html">About</a></li>
     </ul>
     <div class="user-info">
-      <span id="username">Welcome, User!</span>
+      <span id="username">Welcome, <?php echo $username; ?>!</span>
 
       <a href="welcome.php?logout=1" class="logout-btn">Logout</a>
 
@@ -63,7 +63,9 @@ $username = isset($_SESSION['username']) ? htmlspecialchars($_SESSION['username'
 
   <main class="welcome-section">
     <div class="welcome-box">
-      <h1>Hello, <span id="userNameDisplay">User</span></h1>
+      <span id="username">Welcome, <?php echo $username; ?>!</span>
+<h1>Hello, <span id="userNameDisplay"><?php echo $username; ?></span></h1>
+
       <p>Welcome to <strong>Codecryptix</strong> — your space to protect, transform, and explore code securely.</p>
 
       <div class="dashboard-buttons">
@@ -79,10 +81,6 @@ $username = isset($_SESSION['username']) ? htmlspecialchars($_SESSION['username'
   </footer>
 
   <script>
-    // Display stored username
-    const username = localStorage.getItem("username") || "User";
-    document.getElementById("username").textContent = `Welcome, ${username}!`;
-    document.getElementById("userNameDisplay").textContent = username;
 
     // Logout functionality
     document.querySelector(".logout-btn").addEventListener("click", () => {

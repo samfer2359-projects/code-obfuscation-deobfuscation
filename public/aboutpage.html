@@ -12,16 +12,13 @@
   <nav>
     <div class="logo">Codecryptix</div>
     <ul class="nav-links">
-      <li><a href="welcome.html">Home</a></li>
+      <li><a href="welcome.php">Home</a></li>
       <li><a href="obfuscator.php">Obfuscate</a></li>
       <li><a href="deobfuscator.php">Deobfuscate</a></li>
       <li><a href="awareness.html">Learn & Protect</a></li>
       <li><a href="aboutpage.html">About</a></li>
     </ul>
-    <div class="user-info">
-      <span id="username">Welcome, User!</span>
-      <button class="logout-btn">Logout</button>
-    </div>
+    
   </nav>
   <br><br><br>
   <div class="container">
@@ -68,12 +65,8 @@
     const username = localStorage.getItem("username") || "User";
     document.getElementById("username").textContent = `Welcome, ${username}!`;
     document.getElementById("userNameDisplay").textContent = username;
-
-    // Logout functionality
-    document.querySelector(".logout-btn").addEventListener("click", () => {
-      localStorage.removeItem("username");
-      window.location.href = "login.html";
-    });
+  
+   
   </script>
 
 </body>

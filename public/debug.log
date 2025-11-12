@@ -1,0 +1,2 @@
+2025-11-12T08:22:06+01:00 - INSERT obfuscation failed: ERROR:  insert or update on table "obfuscation" violates foreign key constraint "obfuscation_code_id_fkey"
+DETAIL:  Key (code_id)=(1) is not present in table "users".
