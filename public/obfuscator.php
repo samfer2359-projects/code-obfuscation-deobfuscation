@@ -138,7 +138,7 @@ input[type="password"]:focus {
   <form id="obfuscateForm" method="post" action="obfuscate.php">
 
   <textarea id="inputCode" name="original_code" placeholder="Paste your code here..."></textarea>
-  <input type="text" id="language" name="language" placeholder="Enter language (e.g. PHP)">
+  <input type="text" id="language" name="language" placeholder="Enter language">
 
   <div class="pass-note" role="note" aria-live="polite">
   <strong>Set a passkey you will remember:</strong>
