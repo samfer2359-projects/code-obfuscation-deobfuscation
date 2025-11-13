@@ -21,18 +21,19 @@ CREATE TABLE codesnippet (
 );
 
 CREATE TABLE obfuscation (
-    obj_key TEXT PRIMARY KEY,
+    obj_id SERIAL NOT NULL,
     code_id INT NOT NULL UNIQUE,
     obfuscated_code TEXT NOT NULL,
     method_used VARCHAR(100) NOT NULL,
     timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    obj_key TEXT PRIMARY KEY,
     CONSTRAINT obfuscation_code_id_fkey FOREIGN KEY (code_id) 
         REFERENCES codesnippet(code_id) ON DELETE CASCADE
 );
 
 CREATE TABLE deobfuscation (
     deobj_id SERIAL PRIMARY KEY,
-    obj_key TEXT NOT NULL UNIQUE,
+    obj_id INT NOT NULL UNIQUE,
     deobfuscated_code TEXT NOT NULL,
     timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT deobfuscation_obj_key_fkey FOREIGN KEY (obj_key) 

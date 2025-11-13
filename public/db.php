@@ -7,7 +7,7 @@ $host = "localhost";    // host ip address
 $port = "5432";   // default postgresql port
 $dbname = "codecryptix";    // name of database
 $user = "postgres";   
-$password = "r1i2d3d4h5i6";    // postgresql password
+$password = "root";    // postgresql password
 
 // Create connection
 $conn = pg_connect("host=$host port=$port dbname=$dbname user=$user password=$password");
