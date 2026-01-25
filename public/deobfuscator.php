@@ -1,7 +1,16 @@
 <?php
+// Protect page: only accessible to authenticated users
 session_start();
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.html?error=not_logged_in");
+    exit;
+}
+
+// Handle logout
+if (isset($_GET['logout'])) {
+    $_SESSION = [];
+    session_destroy();
+    header("Location: login.html?logged_out=1");
     exit;
 }
 ?>
@@ -102,14 +111,17 @@ input[type="password"]:focus {
       <li><a href="aboutpage.html">About</a></li>
     </ul>
     <div class="user-info">
-      <span id="username">Welcome, User!</span>
-      <button class="logout-btn">Logout</button>
+    <span class="username-display">
+        Welcome, <?php echo htmlspecialchars($_SESSION['username']); ?>!
+    </span>
+    <a href="deobfuscator.php?logout=1" class="logout-btn" style="text-decoration:none;">Logout</a>
     </div>
+
   </nav>
   <br><br><br>
   <h1>Code Deobfuscator</h1>
 
-<input type="password" id="userPassword" placeholder="Enter your password...">
+<input type="password" id="userPassword" placeholder="Enter your passkey...">
 
 
 <div>
@@ -121,23 +133,17 @@ input[type="password"]:focus {
 
 
   <script>
-  // Display stored username (guarded)
-  const username = localStorage.getItem("username") || "User";
-  const usernameElem = document.getElementById("username");
-  if (usernameElem) usernameElem.textContent = `Welcome, ${username}!`;
-  // Only set userNameDisplay if that element exists
-  const userNameDisplayElem = document.getElementById("userNameDisplay");
-  if (userNameDisplayElem) userNameDisplayElem.textContent = username;
+  
+  /*
+    Client-side logic for deobfuscation:
+    - Displays logged-in username
+    - Handles logout
+    - Sends password to secure deobfuscation API
+    - Displays restored source code
+  */
 
-  // Logout functionality (safe guard)
-  const logoutBtn = document.querySelector(".logout-btn");
-  if (logoutBtn) {
-    logoutBtn.addEventListener("click", () => {
-      localStorage.removeItem("username");
-      // optionally call server logout endpoint if you have one
-      window.location.href = "login.html";
-    });
-  }
+  
+ 
 
   function clearText() {
     const pwd = document.getElementById('userPassword');
@@ -157,28 +163,29 @@ input[type="password"]:focus {
     formData.append('password', password);
 
     try {
-      // IMPORTANT: choose the correct URL below:
-      // If your api file is in the same public folder use './deobfuscate.php'
-      // If it's in a separate api folder use '/dynamic-code-obfuscation-deobfuscation/api/deobfuscate.php'
-      const fetchUrl = './deobfuscate.php'; // ← change this if your file is elsewhere
+      
+      const fetchUrl = './deobfuscate.php'; 
 
       console.log('Posting to', fetchUrl);
+
+      // Send password to server-side deobfuscation endpoint
       const res = await fetch(fetchUrl, {
         method: 'POST',
         credentials: 'same-origin',
         body: formData
       });
 
-      // redirect to login if server says unauthorized
+      
+      // Redirect to login if session has expired
       if (res.status === 401) {
         window.location.href = 'login.html?error=not_logged_in';
         return;
       }
 
-      // read raw text for safer debugging
+      
       const text = await res.text();
 
-      // try parse JSON
+      
       let data;
       try {
         data = JSON.parse(text);

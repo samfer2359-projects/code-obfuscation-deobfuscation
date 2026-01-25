@@ -1,119 +1,89 @@
 <?php
-// api/deobfuscate.php
+
+/*
+  Deobfuscation API Endpoint
+  --------------------------
+  Authenticated endpoint that retrieves the latest obfuscated code for the logged-in user, verifies the decryption password, decrypts the payload,and restores the original source code.
+*/
+
+
 session_start();
-error_reporting(0);
-ini_set('display_errors', 0);
-
 header('Content-Type: application/json; charset=utf-8');
+require_once __DIR__ . '/db.php';
 
-include_once __DIR__ . '/db.php'; // expects $conn
 
+// Validate request method and session authentication
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
-    echo json_encode(['error' => 'Invalid request method. Use POST.']);
-    exit;
+    exit(json_encode(['error' => 'POST only']));
 }
-
 if (!isset($_SESSION['user_id'])) {
     http_response_code(401);
-    echo json_encode(['error' => 'You must be logged in to deobfuscate code.']);
-    exit;
+    exit(json_encode(['error' => 'Login required']));
 }
 
-// read password provided by user (used as decryption key)
-$password = isset($_POST['password']) ? trim($_POST['password']) : '';
+$password = trim($_POST['password'] ?? '');
 if ($password === '') {
-    http_response_code(400);
-    echo json_encode(['error' => 'Password is required.']);
-    exit;
+    exit(json_encode(['error' => 'Missing password']));
 }
 
-
-// Find record by verifying token hash
-$q = "SELECT o.obj_key, o.code_id, o.method_used, c.original_code
-      FROM obfuscation o
-      JOIN codesnippet c ON o.code_id = c.code_id";
-$res = pg_query($conn, $q);
-
-
-$found = false;
-$record = null;
-
-if ($res && pg_num_rows($res) > 0) {
-    while ($r = pg_fetch_assoc($res)) {
-        // verify provided password against stored hash (obj_key)
-        if (password_verify($password, $r['obj_key'])) {
-            $found = true;
-            $record = $r;
-            break;
-        }
-    }
-}
+/* Fetch latest obfuscated code owned by the authenticated user */
+$res = pg_query_params(
+    $conn,
+    "SELECT o.code_id, o.obj_key, o.obfuscated_code
+     FROM obfuscation o
+     JOIN codesnippet c ON c.code_id = o.code_id
+     WHERE c.user_id = $1
+     ORDER BY o.timestamp DESC
+     LIMIT 1",
+    [$_SESSION['user_id']]
+);
 
 
+$row = pg_fetch_assoc($res);
 
-// ensure we found a matching record
-if (!$found || !$record) {
+//Verify user-supplied password against stored obfuscation key
+if (!$row || !password_verify($password, $row['obj_key'])) {
     http_response_code(403);
-    echo json_encode(['error' => 'Invalid or incorrect password.']);
-    exit;
+    exit(json_encode(['error' => 'Invalid password']));
 }
 
-// set variables from the found record
-$obj_key = isset($record['obj_key']) ? $record['obj_key'] : null;
-$code_id = isset($record['code_id']) ? (int)$record['code_id'] : null;
-$encoded_original = isset($record['original_code']) ? $record['original_code'] : null;
-$method_used = isset($record['method_used']) ? $record['method_used'] : null;
+$code_id = (int)$row['code_id'];
 
-if (empty($obj_key) || $encoded_original === null) {
-    http_response_code(500);
-    echo json_encode(['error'=>'Server error: record incomplete']);
-    exit;
+/* Derive AES-256 key using PBKDF2 with a per-code salt */
+// PBKDF2 mitigates brute-force attacks on user passwords
+$salt = hash('sha256', 'obf-salt-' . $code_id, true);
+$key  = hash_pbkdf2('sha256', $password, $salt, 150000, 32, true);
+
+/* Decrypt obfuscated payload using AES-256-GCM */
+$raw = base64_decode($row['obfuscated_code'], true);
+$iv  = substr($raw, 0, 12);
+$tag = substr($raw, 12, 16);
+$ct  = substr($raw, 28);
+
+$json = openssl_decrypt($ct, 'aes-256-gcm', $key, OPENSSL_RAW_DATA, $iv, $tag);
+if ($json === false) {
+    exit(json_encode(['error' => 'Decryption failed']));
 }
 
-// decrypt original_code (was stored as base64(iv . raw_ciphertext))
-$decoded = base64_decode($encoded_original);
-$iv_length = openssl_cipher_iv_length('AES-128-CTR');
-if ($decoded === false || strlen($decoded) <= $iv_length) {
-    http_response_code(500);
-    echo json_encode(['error'=>'Server error: corrupted encrypted data']);
-    exit;
-}
-$iv = substr($decoded, 0, $iv_length);
-$ciphertext = substr($decoded, $iv_length);
+$data = json_decode($json, true);
+$code = $data['code'];
+$map  = $data['map'];
 
-// use the provided password as the decryption key (must match encryption key used earlier)
-$decrypted_code = openssl_decrypt($ciphertext, 'AES-128-CTR', $password, OPENSSL_RAW_DATA, $iv);
-
-if ($decrypted_code === false) {
-    http_response_code(403);
-    echo json_encode(['error' => 'Decryption failed. Incorrect password or corrupted data.']);
-    exit;
+/* Restore original identifiers */
+uksort($map, fn($a, $b) => strlen($b) <=> strlen($a));
+foreach ($map as $obf => $orig) {
+    $code = preg_replace('/\b' . preg_quote($obf, '/') . '\b/', $orig, $code);
 }
 
-
-
-
-// Record the action
-$insert_deob_sql = "INSERT INTO deobfuscation (obj_key, deobfuscated_code) VALUES ($1, $2)
-                    ON CONFLICT (obj_key) DO NOTHING";
-
-pg_query_params($conn, $insert_deob_sql, [$obj_key, $decrypted_code]);
-
-
-
-@pg_query_params($conn,
-    "INSERT INTO session_log (user_id, action, status) VALUES ($1, $2, $3)",
-    [$_SESSION['user_id'], 'deobfuscate', 'successful']
+/* Restore string literals preserved during obfuscation */
+$code = preg_replace_callback(
+    '/__STR__(.*?)__/',
+    fn($m) => '"' . base64_decode($m[1]) . '"',
+    $code
 );
 
 echo json_encode([
     'success' => true,
-    'code_id' => $code_id,
-    'method_used' => $method_used,
-    'deobfuscated_code' => $decrypted_code
+    'deobfuscated_code' => $code
 ]);
-
-
-exit;
-?>

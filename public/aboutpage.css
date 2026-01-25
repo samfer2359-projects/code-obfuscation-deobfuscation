@@ -1,16 +1,15 @@
-/* General Page Background */
 body {
-  background-color: #fffdf7;
+  background-color: #fffdf7;  
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   color: #212121;
   margin: 0;
   padding: 0;
 }
 
-/* Container Box */
+
 .container {
-  max-width: 800px;
-  margin: 40px auto;
+  max-width: 800px; 
+  margin: 40px auto; 
   padding: 30px;
   background: #ffffff;
   border-radius: 16px;
@@ -18,7 +17,7 @@ body {
   text-align: center;
 }
 
-/* Headings */
+
 h1 {
   font-size: 2.2rem;
   color: #212121;
@@ -32,7 +31,7 @@ h2 {
   margin-bottom: 10px;
 }
 
-/* Intro Paragraph */
+
 .intro {
   font-size: 1.1rem;
   color: #6b7280;
@@ -40,14 +39,14 @@ h2 {
   line-height: 1.6;
 }
 
-/* Normal Paragraphs */
+
 p {
   color: #212121;
   line-height: 1.6;
   margin-bottom: 15px;
 }
 
-/* Features List */
+
 .features-list {
   list-style: none;
   padding: 0;
@@ -66,7 +65,7 @@ p {
   transition: transform 0.2s;
 }
 
-/* Button */
+
 .btn {
   background: #4caf50;
   color: white;
@@ -79,5 +78,5 @@ p {
 }
 
 .btn:hover {
-  background: #388e3c; /* darker hover */
+  background: #388e3c; 
 }

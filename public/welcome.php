@@ -1,18 +1,18 @@
 <?php
 session_start();
 
-// If user not logged in, redirect to login page
+// Redirect if not logged in
 if (!isset($_SESSION['user_id'])) {
     header('Location: login.html?error=not_logged_in');
     exit;
 }
 
-// If logout is requested (by URL parameter)
+// Handle logout
 if (isset($_GET['logout'])) {
-    // Clear all session variables
+    
     $_SESSION = array();
 
-    // If using cookies for sessions, delete the session cookie
+    
     if (ini_get("session.use_cookies")) {
         $params = session_get_cookie_params();
         setcookie(session_name(), '', time() - 42000,
@@ -21,15 +21,15 @@ if (isset($_GET['logout'])) {
         );
     }
 
-    // Finally destroy the session
+    
     session_destroy();
 
-    // Redirect to login page
+    
     header('Location: login.html?logged_out=1');
     exit;
 }
 
-// Set display name
+
 $username = isset($_SESSION['username']) ? htmlspecialchars($_SESSION['username']) : 'User';
 ?>
 
@@ -55,7 +55,7 @@ $username = isset($_SESSION['username']) ? htmlspecialchars($_SESSION['username'
     <div class="user-info">
       <span id="username">Welcome, <?php echo $username; ?>!</span>
 
-      <a href="welcome.php?logout=1" class="logout-btn">Logout</a>
+      <a href="welcome.php?logout=1" class="logout-btn" style="text-decoration:none;">Logout</a>
 
 
     </div>
@@ -63,7 +63,7 @@ $username = isset($_SESSION['username']) ? htmlspecialchars($_SESSION['username'
 
   <main class="welcome-section">
     <div class="welcome-box">
-      <span id="username">Welcome, <?php echo $username; ?>!</span>
+      
 <h1>Hello, <span id="userNameDisplay"><?php echo $username; ?></span></h1>
 
       <p>Welcome to <strong>Codecryptix</strong> — your space to protect, transform, and explore code securely.</p>
@@ -80,13 +80,5 @@ $username = isset($_SESSION['username']) ? htmlspecialchars($_SESSION['username'
     <p>© 2025 Codecryptix | Built with 💚 for creative coders</p>
   </footer>
 
-  <script>
-
-    // Logout functionality
-    document.querySelector(".logout-btn").addEventListener("click", () => {
-      localStorage.removeItem("username");
-      window.location.href = "login.html";
-    });
-  </script>
 </body>
 </html>

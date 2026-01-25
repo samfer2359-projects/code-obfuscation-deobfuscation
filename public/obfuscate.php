@@ -1,269 +1,112 @@
 <?php
-// api/obfuscate.php - simple obfuscator; dummy function inserted at random position
-
 session_start();
-ini_set('display_errors', '0');
-error_reporting(0);
 header('Content-Type: application/json; charset=utf-8');
-include_once __DIR__ . '/db.php';
+require_once __DIR__ . '/db.php';
+
+// Reversible code obfuscation endpoint with per-user encryption and session-based access control
+
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
-    echo json_encode(['error' => 'Use POST']);
-    exit;
+    exit(json_encode(['error' => 'POST only']));
 }
 if (!isset($_SESSION['user_id'])) {
     http_response_code(401);
-    echo json_encode(['error' => 'Login required']);
-    exit;
+    exit(json_encode(['error' => 'Login required']));
 }
 
-$original_code = isset($_POST['original_code']) ? (string) $_POST['original_code'] : '';
-$language = isset($_POST['language']) ? strtolower(trim((string) $_POST['language'])) : '';
-if ($original_code === '' || $language === '') {
-    http_response_code(400);
-    echo json_encode(['error' => 'Provide original_code and language']);
-    exit;
-}
-$password = isset($_POST['password']) ? trim((string)$_POST['password']) : '';
-if ($password === '') {
-    http_response_code(400);
-    echo json_encode(['error' => 'Password required']);
-    exit;
+$original = trim($_POST['original_code'] ?? '');
+$lang     = strtolower(trim($_POST['language'] ?? ''));
+$password = trim($_POST['password'] ?? '');
+
+if ($original === '' || $password === '') {
+    exit(json_encode(['error' => 'Missing parameters']));
 }
 
+//Reserved keywords to exclude from obfuscation
+$keywords = match ($lang) {
+    'js', 'javascript' => [
+        'function','return','if','else','for','while','var','let','const',
+        'class','new','this','switch','case','break','continue','console','log'
+    ],
+    'python' => [
+        'def','return','if','else','elif','for','while','import','from',
+        'class','print','None','True','False','and','or','not','in'
+    ],
+    'c' => [
+        'int','char','float','double','void','return','if','else','for',
+        'while','static','struct','typedef','include','define','printf'
+    ],
+    default => exit(json_encode(['error' => 'Unsupported language']))
+};
 
-// run randomness (in-memory only)
-$run_id = substr(bin2hex(random_bytes(3)), 0, 6);
-$do_rename = (bool) random_int(0, 1);
-$do_dummy  = (bool) random_int(0, 1);
-$do_runmark = true;
+$user_id = (int)$_SESSION['user_id'];
 
-// helpers
-function light_minify($code) {
-    $code = preg_replace('#/\*.*?\*/#s', '', $code);
-    $code = preg_replace('#//.*$#m', '', $code);
-    $code = preg_replace("/\n{2,}/", "\n", $code);
-    return trim($code);
-}
-function mkname($base, $run_id) {
-    return $base . '_' . $run_id;
-}
-function word_replace_all($code, $old, $new) {
-    return preg_replace('/\b' . preg_quote($old, '/') . '\b/', $new, $code);
-}
+//Create code record and generate unique code_id
+$res = pg_query_params(
+    $conn,
+    "INSERT INTO codesnippet (user_id, original_code, language)
+     VALUES ($1, '', $2) RETURNING code_id",
+    [$user_id, $lang]
+);
+$row = pg_fetch_assoc($res);
+$code_id = (int)$row['code_id'];
 
-// renamers
-function rename_js_vars($code, $run_id, &$methods) {
-    if (preg_match_all('/\b(?:var|let|const)\s+([A-Za-z_]\w*)/m', $code, $matches)) {
-        $names = array_unique($matches[1]);
-        foreach ($names as $name) $code = word_replace_all($code, $name, mkname($name, $run_id));
-        $methods[] = 'rename-js';
-    }
-    return $code;
-}
-function rename_py_vars($code, $run_id, &$methods) {
-    $lines = explode("\n", $code);
-    foreach ($lines as $i => $ln) {
-        if (preg_match('/^\s*([A-Za-z_]\w*)\s*=/', $ln, $m)) {
-            $old = $m[1]; $new = mkname($old, $run_id);
-            $lines[$i] = preg_replace('/^(\s*)' . preg_quote($old, '/') . '\b/', '$1' . $new, $lines[$i], 1);
-            $code = implode("\n", $lines);
-            $code = word_replace_all($code, $old, $new);
-        }
-    }
-    $methods[] = 'rename-py';
-    return $code;
-}
-function rename_c_vars($code, $run_id, &$methods) {
-    if (preg_match_all('/\b(?:int|char|float|double|long|short|unsigned)\s+([A-Za-z_]\w*)\b/', $code, $matches)) {
-        $names = array_unique($matches[1]);
-        foreach ($names as $name) $code = word_replace_all($code, $name, mkname($name, $run_id));
-        $methods[] = 'rename-c';
-    }
-    return $code;
-}
+//Derive encryption key and password verifier
+$salt = hash('sha256', 'obf-salt-' . $code_id, true);
+$key  = hash_pbkdf2('sha256', $password, $salt, 150000, 32, true);
+$token_hash = password_hash($password, PASSWORD_ARGON2ID);
 
-// dummy function blocks
-function dummy_js_block($run_id) {
-    return "/* DUMMY_FUNC_{$run_id} */\nif (0) { function __dummy_{$run_id}(){ return 42; } }\n";
-}
-function dummy_py_block($run_id) {
-    return "# DUMMY_FUNC_{$run_id}\nif False:\n    def __dummy_{$run_id}():\n        return 42\n";
-}
-function dummy_c_block($run_id) {
-    return "/* DUMMY_FUNC_{$run_id} */\n#if 0\nint __dummy_{$run_id}() { return 42; }\n#endif\n";
-}
+//Protect string literals to prevent accidental obfuscation
+$code = preg_replace_callback(
+    '/(["\'])(?:\\\\.|(?!\1).)*\1/s',
+    function ($m) {
+        $str = substr($m[0], 1, -1);
+        return '__STR__' . base64_encode($str) . '__';
+    },
+    $original
+);
 
-// insert block at position: 'top', 'middle', 'bottom'
-function insert_block_at_position($code, $block, $position) {
-    $lines = explode("\n", $code);
-    if ($position === 'top') {
-        array_unshift($lines, $block);
-        return implode("\n", $lines);
-    } elseif ($position === 'bottom') {
-        $lines[] = $block;
-        return implode("\n", $lines);
-    } else { // middle
-        $half = (int) floor(count($lines) / 2);
-        $top = array_slice($lines, 0, $half);
-        $bottom = array_slice($lines, $half);
-        $new = array_merge($top, array($block), $bottom);
-        return implode("\n", $new);
+//Deterministic identifier obfuscation with reversible mapping
+$map = [];
+$run = bin2hex(random_bytes(4));
+
+preg_match_all('/\b[a-zA-Z_][a-zA-Z0-9_]*\b/', $code, $matches);
+
+foreach (array_unique($matches[0]) as $id) {
+    if (in_array($id, $keywords, true)) continue;
+    if (str_starts_with($id, '__STR__')) continue;
+
+    if (!isset($map[$id])) {
+        $obf = '_v' . substr(hash('sha1', $id . $run), 0, 10);
+        $map[$obf] = $id;
+        $code = preg_replace('/\b' . preg_quote($id, '/') . '\b/', $obf, $code);
     }
 }
 
-// store original snippet (DB unchanged)
-// store original snippet encrypted using user's password
-$user_id = (int) $_SESSION['user_id'];
 
-// encrypt original_code using password as key (AES-128-CTR)
-$orig_iv_length = openssl_cipher_iv_length('AES-128-CTR');
-$orig_iv = openssl_random_pseudo_bytes($orig_iv_length);
-$orig_cipher_raw = openssl_encrypt($original_code, 'AES-128-CTR', $password, OPENSSL_RAW_DATA, $orig_iv);
-$encoded_original = base64_encode($orig_iv . $orig_cipher_raw);
+$payload = json_encode([
+    'code' => $code,
+    'map'  => $map,
+    'lang' => $lang
+]);
 
-$insert_sql = "INSERT INTO codesnippet (user_id, original_code, language) VALUES ($1, $2, $3) RETURNING code_id";
-$ins = pg_query_params($conn, $insert_sql, array($user_id, $encoded_original, $language));
-if ($ins === false) {
-    http_response_code(500);
-    echo json_encode(['error' => 'DB error inserting codesnippet', 'details' => pg_last_error($conn)]);
-    exit;
-}
-$row = pg_fetch_assoc($ins);
-$code_id = (int) $row['code_id'];
+//Encrypt payload using AES-256-GCM 
+$iv  = random_bytes(12);
+$tag = '';
+$cipher = openssl_encrypt($payload, 'aes-256-gcm', $key, OPENSSL_RAW_DATA, $iv, $tag);
+$encrypted = base64_encode($iv . $tag . $cipher);
 
-
-// pipeline
-$methods = [];
-$code = light_minify($original_code);
-$methods[] = 'minify';
-
-// renaming
-if (($language === 'js' || $language === 'javascript') && $do_rename) {
-    $code = rename_js_vars($code, $run_id, $methods);
-} elseif (($language === 'py' || $language === 'python') && $do_rename) {
-    $code = rename_py_vars($code, $run_id, $methods);
-} elseif (in_array($language, ['c', 'cpp', 'c++'], true) && $do_rename) {
-    $code = rename_c_vars($code, $run_id, $methods);
-}
-
-// dummy insertion at random position if chosen
-if ($do_dummy) {
-    $positions = ['top','middle','bottom'];
-    $pos = $positions[random_int(0, 2)];
-    if ($language === 'js' || $language === 'javascript') {
-        $block = dummy_js_block($run_id);
-        $code = insert_block_at_position($code, $block, $pos);
-        $methods[] = 'dummy-js-' . $pos;
-    } elseif ($language === 'py' || $language === 'python') {
-        $block = dummy_py_block($run_id);
-        $code = insert_block_at_position($code, $block, $pos);
-        $methods[] = 'dummy-py-' . $pos;
-    } elseif (in_array($language, ['c', 'cpp', 'c++'], true)) {
-        $block = dummy_c_block($run_id);
-        $code = insert_block_at_position($code, $block, $pos);
-        $methods[] = 'dummy-c-' . $pos;
-    } else {
-        $block = "/* DUMMY_FUNC_{$run_id} */\n";
-        $code = insert_block_at_position($code, $block, $pos);
-        $methods[] = 'dummy-generic-' . $pos;
-    }
-}
-
-// always append run marker at bottom
-if ($do_runmark) {
-    $code .= "\n\n/*RUN_{$run_id}*/\n";
-    $methods[] = 'run-id';
-}
-
-// store a hash of the user's password in obj_key for later verification
-$token_hash = password_hash($password, PASSWORD_DEFAULT);
-
-
-
-//encrypt, encode & store
-//$obf_blob = base64_encode($code);
-// Encrypts and then coverts to base 64
-//encrypt, include iv & base64 encode for safe text storage
-$iv_length = openssl_cipher_iv_length('AES-128-CTR');
-$iv = openssl_random_pseudo_bytes($iv_length);
-
-// get raw ciphertext
-$cipher_raw = openssl_encrypt($code, 'AES-128-CTR', $password, OPENSSL_RAW_DATA, $iv);
-
-
-// store iv + cipher as base64 so it is UTF-8 safe
-$obf_blob = base64_encode($iv . $cipher_raw);
-
-$methods[] = 'aes-128-ctr';
-$methods[] = 'base64';
-$method_used = implode(';', $methods);
-
-
-// If an obfuscation for this code_id already exists, return its obj_key and obfuscated blob instead
-$check_sql = "SELECT obj_key, obfuscated_code, method_used FROM obfuscation WHERE code_id = $1 LIMIT 1";
-$check = @pg_query_params($conn, $check_sql, array($code_id));
-if ($check === false) {
-    // DB error while checking
-    http_response_code(500);
-    echo json_encode(['error' => 'DB error checking existing obfuscation', 'details' => pg_last_error($conn)]);
-    exit;
-}
-
-if (pg_num_rows($check) > 0) {
-    $existing = pg_fetch_assoc($check);
-    // Do NOT expose obj_key publicly
-    echo json_encode([
-        'success' => true,
-        'access_token' => null,
-        'code_id' => $code_id,
-        'run_id' => $run_id,
-        'method_used' => $existing['method_used'],
-        'obfuscated_code' => $existing['obfuscated_code'],
-        'note' => 'Existing obfuscation for this code_id returned.'
-    ]);
-    exit;
-}
-
-
-// Insert new obfuscation (no existing record)
-$insert_obf_sql = "INSERT INTO obfuscation (obj_key, code_id, obfuscated_code, method_used) VALUES ($1, $2, $3, $4) RETURNING obj_key, timestamp";
-$res2 = @pg_query_params($conn, $insert_obf_sql, array($token_hash, $code_id, $obf_blob, $method_used));
-if ($res2 === false) {
-    // log and return DB error
-    @file_put_contents(__DIR__ . '/debug.log', date('c') . " - INSERT obfuscation failed: " . pg_last_error($conn) . PHP_EOL, FILE_APPEND | LOCK_EX);
-    http_response_code(500);
-    echo json_encode(['error' => 'DB error inserting obfuscation', 'details' => pg_last_error($conn)]);
-    exit;
-}
-$ob_row = pg_fetch_assoc($res2);
-
-
-// defensive: ensure insert succeeded
-if ($res2 === false) {
-    @file_put_contents(__DIR__ . '/debug.log', date('c') . " - Missing token_hash after insert." . PHP_EOL, FILE_APPEND | LOCK_EX);
-    http_response_code(500);
-    echo json_encode(['error' => 'Server error: token/key missing after insert', 'details' => pg_last_error($conn)]);
-    exit;
-}
-
-
-
-
-@pg_query_params($conn, "INSERT INTO session_log (user_id, action, status) VALUES ($1, $2, $3)", array($user_id, 'obfuscate', 'successful'));
+//Persist encrypted obfuscation result
+pg_query_params(
+    $conn,
+    "INSERT INTO obfuscation (obj_key, code_id, obfuscated_code, method_used)
+     VALUES ($1, $2, $3, $4)",
+    [$token_hash, $code_id, $encrypted, 'js|python|c-reversible']
+);
 
 echo json_encode([
     'success' => true,
     'code_id' => $code_id,
-    'run_id' => $run_id,
-    'method_used' => $method_used,
-    'obfuscated_code' => $obf_blob,
-    'note' => 'Obfuscation created. Use your password to deobfuscate.'
+    'obfuscated_code' => $code
 ]);
-exit;
-
-
-exit;
-
-?>

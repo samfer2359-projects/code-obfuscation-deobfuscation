@@ -1,13 +1,17 @@
 <?php
 
-// Website reffered to while creating this php file: URL: https://www.tutorialspoint.com/postgresql/postgresql_php.htm
+
+// Reference: PostgreSQL PHP connection approach adapted from Tutorialspoint
+// https://www.tutorialspoint.com/postgresql/postgresql_php.htm
+
+
 
 // Database connection parameters
-$host = "localhost";    // host ip address
+$host = "localhost";    // database host
 $port = "5432";   // default postgresql port
 $dbname = "codecryptix";    // name of database
 $user = "postgres";   
-$password = "root";    // postgresql password
+$password = "root";    // database password
 
 // Create connection
 $conn = pg_connect("host=$host port=$port dbname=$dbname user=$user password=$password");
@@ -15,11 +19,10 @@ $conn = pg_connect("host=$host port=$port dbname=$dbname user=$user password=$pa
 // check if connection failed
 if(!$conn)
 {
-   // echo "Error : Unable to connect to the database.";
+   // Exit if the connection fails";
     exit;
 }
 
-// if connection is successful, the connection object (link) is established
-// echo "Connected to the database successfully!";
+// Connection established successfully
 
 ?>

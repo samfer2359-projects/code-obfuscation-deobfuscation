@@ -26,6 +26,7 @@
     This page helps you understand the growing importance of online safety and how our website empowers you to stay secure.</p>
   </section>
 
+  <!-- External sources for awareness news -->
   <section class="news">
     <h2>Recent News & Insights</h2>
     <div class="news-container">
@@ -99,19 +100,11 @@
   </footer>
 
   <script>
-    // Display stored username
+    // Display username stored in localStorage (used in shared navigation)
     const username = localStorage.getItem("username") || "User";
     document.getElementById("username").textContent = `Welcome, ${username}!`;
     document.getElementById("userNameDisplay").textContent = username;
 
-    /*
-    // Logout functionality
-    document.querySelector(".logout-btn").addEventListener("click", () => {
-      localStorage.removeItem("username");
-      window.location.href = "login.html";
-      
-    });
-    */
   </script>
 
 </body>

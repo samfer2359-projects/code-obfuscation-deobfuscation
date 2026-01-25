@@ -4,6 +4,14 @@ if (!isset($_SESSION['user_id'])) {
     header("Location: login.html?error=not_logged_in");
     exit;
 }
+
+if (isset($_GET['logout'])) {
+    $_SESSION = [];
+    session_destroy();
+    header("Location: login.html?logged_out=1");
+    exit;
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -29,8 +37,8 @@ if (!isset($_SESSION['user_id'])) {
   }
 
   form {
-  width: 95vw; /* 95% of the viewport width */
-  max-width: none; /* remove restriction */
+  width: 95vw; 
+  max-width: none; 
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -100,7 +108,7 @@ input[type="password"]:focus {
   button:hover {
     background-color: #388e3c;
   }
-/* passkey reminder */
+
 .pass-note {
   width: 90%;
   margin: 8px 0;
@@ -129,8 +137,14 @@ input[type="password"]:focus {
       <li><a href="aboutpage.html">About</a></li>
     </ul>
     <div class="user-info">
-      <span id="username">Welcome, User!</span>
-      <button class="logout-btn">Logout</button>
+      
+      <span class="username-display">
+       Welcome, <?php echo htmlspecialchars($_SESSION['username']); ?>!
+      </span>
+
+      
+      <a href="welcome.php?logout=1" class="logout-btn" style="text-decoration:none;">Logout</a>
+
     </div>
   </nav>
   <br><br><br>
@@ -146,7 +160,7 @@ input[type="password"]:focus {
 </div>
 
 
-<input type="password" id="userPassword" placeholder="Enter your password...">
+<input type="password" id="userPassword" placeholder="Enter your passkey...">
 
 
 
@@ -165,20 +179,19 @@ input[type="password"]:focus {
 
 
   </form>
-  <script>
-  // Display stored username safely (only if element exists)
-  const storedUser = localStorage.getItem("username") || "User";
-  const usernameElem = document.getElementById("username");
-  if (usernameElem) usernameElem.textContent = `Welcome, ${storedUser}!`;
 
-  // Logout functionality (safe guard if button exists)
-  const logoutBtn = document.querySelector(".logout-btn");
-  if (logoutBtn) {
-    logoutBtn.addEventListener("click", () => {
-      localStorage.removeItem("username");
-      window.location.href = "login.html";
-    });
-  }
+  <script>
+
+  /*
+    Client-side logic for code obfuscation:
+    - Handles form submission via fetch
+    - Sends code, language, and passkey to secure API
+    - Displays obfuscated output
+    - Manages session-based logout
+  */
+
+
+
 
   function clearText() {
     const input = document.getElementById('inputCode');
@@ -189,7 +202,7 @@ input[type="password"]:focus {
     if (input) input.value = '';
     if (output) output.value = '';
     if (lang) lang.value = '';
-    if (pass) pass.value = ''; // clears the password field
+    if (pass) pass.value = ''; 
   }
 
   document.getElementById('obfuscateForm').addEventListener('submit', async function (e) {
@@ -208,13 +221,13 @@ input[type="password"]:focus {
       return;
     }
 
-    // build form data
+   
     const formData = new FormData();
     formData.append('original_code', input);
     formData.append('language', language);
     formData.append('password', password);
 
-    // disable submit while request in progress (optional UX)
+   
     const submitBtn = this.querySelector('button[type="submit"]');
     if (submitBtn) submitBtn.disabled = true;
 
@@ -225,13 +238,13 @@ input[type="password"]:focus {
         body: formData
       });
 
-      // If server returns 401 — user not logged in — redirect to login page
+      // Redirect to login if session has expired
       if (res.status === 401) {
         window.location.href = 'login.html?error=not_logged_in';
         return;
       }
 
-      // handle other non-OK statuses
+     
       if (!res.ok) {
         const txt = await res.text();
         throw new Error(txt || 'Server error');
@@ -240,15 +253,15 @@ input[type="password"]:focus {
       const data = await res.json();
 
       if (data.success) {
-        // show base64 obfuscated blob in output textarea
+        
         const out = document.getElementById('outputCode');
         if (out) out.value = data.obfuscated_code || '';
 
-        // clear password from the form after success (security)
+        
         const passField = document.getElementById('userPassword');
         if (passField) passField.value = '';
 
-        // log only method for debugging (do not log secrets)
+        
         console.log('obfuscation method:', data.method_used || '(unknown)');
       } else {
         alert('Error: ' + (data.error || 'Unknown error'));

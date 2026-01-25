@@ -10,7 +10,7 @@ body {
   color: #2c2c2c;
 }
 
-/* Navigation */
+
 nav {
   display: flex;
   justify-content: space-between;
@@ -43,7 +43,7 @@ nav .nav-links li a:hover {
   color: #4caf50;
 }
 
-/* Intro Section */
+
 .intro {
   text-align: center;
   padding: 60px 20px 30px;
@@ -63,7 +63,7 @@ nav .nav-links li a:hover {
   font-size: 17px;
 }
 
-/* News Section */
+
 .news {
   padding: 50px 40px;
   background: #e8f5e9;
@@ -108,7 +108,7 @@ nav .nav-links li a:hover {
   font-weight: 500;
 }
 
-/* Stats Section */
+
 .stats {
   padding: 60px 40px;
   text-align: center;
@@ -131,7 +131,7 @@ nav .nav-links li a:hover {
   margin-bottom: 10px;
 }
 
-/* Studies Section */
+
 .studies {
   background: #e8f5e9;
   padding: 50px 40px;
@@ -150,7 +150,7 @@ nav .nav-links li a:hover {
   line-height: 1.8;
 }
 
-/* Why Us Section */
+
 .why-us {
   padding: 60px 40px;
   text-align: center;
@@ -169,7 +169,7 @@ nav .nav-links li a:hover {
   line-height: 1.6;
 }
 
-/* Footer */
+
 footer {
   background-color: #dbf0dd;
   text-align: center;
