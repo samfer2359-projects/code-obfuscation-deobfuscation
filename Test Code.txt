@@ -1,0 +1,33 @@
+js -
+function greet(name) {
+    let message = "Hello, " + name;
+    console.log(message);
+    return message;
+}
+
+let userName = "Alice";
+greet(userName);
+
+python - 
+def greet(name):
+    message = "Hello, " + name
+    print(message)
+    return message
+
+user_name = "Alice"
+greet(user_name)
+
+C - 
+#include <stdio.h>
+
+int greet(char name[]) {
+    char message[50];
+    sprintf(message, "Hello, %s", name);
+    printf("%s\n", message);
+    return 0;
+}
+
+int main() {
+    greet("Alice");
+    return 0;
+}
