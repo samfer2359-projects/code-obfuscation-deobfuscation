@@ -57,6 +57,7 @@ function greet(name) {
     console.log(message);
     return message;
 }
+```
 
 ---
 
