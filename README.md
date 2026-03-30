@@ -57,6 +57,9 @@ function greet(name) {
     console.log(message);
     return message;
 }
+
+let userName = "Alice";
+greet(userName);
 ```
 
 ---
@@ -72,6 +75,3 @@ function greet(name) {
 
 The core logic and design of the obfuscator/deobfuscator were implemented with **assistance from AI tools**.  
 All contributors worked together on the frontend, backend, and database integration.
-
-let userName = "Alice";
-greet(userName);
