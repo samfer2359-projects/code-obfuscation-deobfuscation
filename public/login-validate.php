@@ -5,9 +5,9 @@
 
 session_start(); // Initialize session for authentication state
 
-include('db.php'); // db.php should set $conn with pg_connect(...)
+include('db.php'); 
 
-// Handle login form submission only
+// Handle login form submission 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // Get form input values
@@ -16,7 +16,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // Check if both fields are provided
     if (empty($username) || empty($password)) {
-       // echo "Please provide both username and password.";
+       
        header("Location: login.html?error=invalid_credentials");
         exit;
     }
@@ -26,7 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $result = pg_query_params($conn, $query, array($username));
 
     if ($result === false) {
-       // echo "Database query error.";
+       
         exit;
     }
 
@@ -43,7 +43,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['username'] = $user['username'];
             $_SESSION['email'] = $user['email'];
 
-            // Optionally: Store the current time or last login time in session
+            
             $_SESSION['logged_in_at'] = date('Y-m-d H:i:s');
 
             // Audit log: record successful login
@@ -70,7 +70,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     exit;
     }
 } else {
-    // If the form was not submitted via POST method
+    
     header("Location: login.html?error=request");
     exit;
 }
