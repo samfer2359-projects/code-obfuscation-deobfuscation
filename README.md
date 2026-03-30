@@ -58,5 +58,19 @@ function greet(name) {
     return message;
 }
 
+---
+
+## Project Info / Credits
+
+**Codecryptix** is a **group project** developed collaboratively by:
+
+- Siddhi Kale  
+- Esha Gadekar
+- Riddhi Chogale
+- Samantha Fernandes  
+
+The core logic and design of the obfuscator/deobfuscator were implemented with **assistance from AI tools**.  
+All contributors worked together on the frontend, backend, and database integration.
+
 let userName = "Alice";
 greet(userName);
