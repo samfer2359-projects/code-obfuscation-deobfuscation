@@ -59,7 +59,7 @@ function greet(name) {
 
 let userName = "Alice";
 greet(userName);
-
+```
 ---
 
 ## Project Info / Credits
