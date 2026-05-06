@@ -15,6 +15,45 @@ Codecryptix is a web-based application that enables users to obfuscate and deobf
 
 ---
 
+# Website UI
+
+## Main Page
+![Main UI](static/main.png)
+
+## Signup Page
+![Sign Up UI](static/signup.png)  
+
+## Login Page
+![Login UI](static/login.png)
+
+## Home Dashboard
+![Home UI](static/home.png)
+
+## Obfuscation Pages
+![Obfuscation UI 1](static/ob1.png)
+### User enters code , language and passkey to obfuscate code
+![Obfuscation UI 2](static/ob2.png)
+### Result
+![Obfuscation UI 3](static/ob3.png)
+
+### Deobfuscation Pages
+![Deobfuscation UI 1](static/deob1.png)
+### User enters passkey to deobfuscate code
+![Deobfuscation UI 2](static/deob2.png)
+### Result
+![Deobfuscation UI 3](static/deob3.png)
+
+## Learn and Protect Page
+![LP UI 1](static/lp1.png)
+![LP UI 2](static/lp2.png)
+![LP UI 3](static/lp3.png)
+
+## About Page
+![About UI 1](static/ab1.png)
+![About UI 2](static/ab2.png)
+
+---
+
 ## Tech Stack
 
 - Frontend: HTML, CSS, JavaScript  
