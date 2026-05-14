@@ -4,17 +4,6 @@ Codecryptix is a web-based application that enables users to obfuscate and deobf
 
 ---
 
-## Features
-
-- Multi-language support: JavaScript, Python, C  
-- Reversible obfuscation using a user-defined passkey  
-- Identifier and string protection  
-- Control-flow transformation and dummy function injection  
-- User authentication system for secure access  
-- Web-based interface for easy code input and retrieval  
-
----
-
 # Website UI
 
 ## Main Page
@@ -51,6 +40,18 @@ Codecryptix is a web-based application that enables users to obfuscate and deobf
 ## About Page
 ![About UI 1](static/ab1.png)
 ![About UI 2](static/ab2.png)
+
+
+---
+
+## Features
+
+- Multi-language support: JavaScript, Python, C  
+- Reversible obfuscation using a user-defined passkey  
+- Identifier and string protection  
+- Control-flow transformation and dummy function injection  
+- User authentication system for secure access  
+- Web-based interface for easy code input and retrieval  
 
 ---
 
@@ -109,3 +110,8 @@ greet(userName);
 - Esha Gadekar
 - Riddhi Chogale
 - Samantha Fernandes
+
+## Project Status
+
+This project is currently configured for local development.  
+A production deployment version is planned as part of future improvements.
