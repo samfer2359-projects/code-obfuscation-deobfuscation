@@ -1,7 +1,7 @@
 # Codecryptix – Reversible Code Obfuscator & Deobfuscator
 
 Codecryptix is a web-based application that enables users to obfuscate and deobfuscate source code using reversible techniques and a secure passkey system. It supports multiple programming languages and applies transformations such as identifier obfuscation, string shielding, and control-flow modification.  
-All detailed technical documentation, including challenges, design decisions, and system architecture notes, is available in the `/docs` folder.
+All challenges and lessons learned are documented in `/docs/lessons-learned.md`.
 
 ---
 
